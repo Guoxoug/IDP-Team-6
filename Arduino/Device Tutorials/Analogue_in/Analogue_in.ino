@@ -8,5 +8,5 @@ void setup() {
 
 void loop() {
   sensorValue = analogRead(sensorPin);
-  Serial.println(sensorValue);
+  Serial.println(sensorValue*0.0009765625*5);
 }
