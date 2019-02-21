@@ -1,0 +1,23 @@
+Control architecture:
+c++ on arduino
+    basic conditional statements triggered by serial input
+    functions that can be called that control the servos
+    input from sensors as serial output (need to be digital)
+Python on PC
+    Controller here
+    Does all the decision making (if it is even needed)
+    Takes serial input and outputs byte-strings to arduino
+
+Python program structure
+
+
+
+Arduino Python interface
+    Python takes arduino bytestring and is able to convert back to characters
+    C++ to get char from byte need to convert using char()
+    Better to declare a charstring to write into (no standard library for string in Arduino :(
+    Arduino stores incoming bytes in buffer (64 byte size)
+    Arduino discards new data if buffer is full
+    Read data is stored into memory and removed from buffer
+    Probably same deal on PC  side but none issue since buffer will be much larger
+    
