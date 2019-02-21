@@ -54,13 +54,15 @@ void loop() {
 }
 
 void establishContact() {
-    //while loop is horrible, doesn't exit, needs investigation
-    Serial.write("Hello"); // send handshake message
+    //THIS FUNC IN SETUP, "handshake" in python immediately after port connection established
+    Serial.write("hello"); // send handshake message
     int counter = 0;
+    // loops until it gets something or it times out
     while(true){
-    int message = Serial.read();
+    
     if (Serial.available() > 0){
-      Serial.write(char(message));
+      int message = Serial.read();
+      Serial.write(char(message)); // should receive an H
       break; 
     }else if(counter == 20){
       for( int a = 0; a < 10; a++ ){
