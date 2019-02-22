@@ -16,14 +16,26 @@ void loop() {
   int incoming_byte;
  if (Serial.available() > 0){
       incoming_byte = Serial.read();
- 
-   Serial.write(incoming_byte);
+ }
+ switch(incoming_byte){
+    case 0 : 
+    digitalWrite(LED_BUILTIN, LOW);
+    break;
+    case 1 : 
+    digitalWrite(LED_BUILTIN, HIGH);
+    break;
+    case 2 : 
+    digitalWrite(LED_BUILTIN, LOW);
+    break;
+    default :;
+ }
+ }
 
-  }
+
 
 
   
-}
+
 
 void establishContact() {
     //THIS FUNC IN SETUP, "handshake" in python immediately after port connection established

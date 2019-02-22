@@ -7,12 +7,12 @@ arduino_port = serial.Serial(name, 9600, timeout=5)  # 5 second timout for read 
 initialise_connection.handshake(arduino_port)
 while True:
     keyboard_input = input("space for on, just enter for off, two spaces for exit")
-    if keyboard_input == " ":
-        arduino_port.write(0)
+    if keyboard_input == "":
+        arduino_port.write(bytes([0]))  # to send int as byte use this syntax
     elif keyboard_input == " ":
-        arduino_port.write(1)
-    elif keyboard_input == " ":
-        arduino_port.write(2)
+        arduino_port.write(bytes([1]))
+    elif keyboard_input == "  ":
+        arduino_port.write(bytes([2]))
         break
 
 arduino_port.close()

@@ -20,4 +20,6 @@ Arduino Python interface
     Arduino discards new data if buffer is full
     Read data is stored into memory and removed from buffer
     Probably same deal on PC  side but none issue since buffer will be much larger
+
+    bytes([0]) makes a byte that is converted to int 0  in the arduino
     
