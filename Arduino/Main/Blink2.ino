@@ -12,6 +12,8 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-	light.toggle();
-	delay(1000);
+//	light.toggle();
+//	delay(1000);
+	flash_builtin();
+	flash_builtin(100, 10);
 }

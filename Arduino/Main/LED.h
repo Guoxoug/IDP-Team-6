@@ -8,6 +8,8 @@
 #ifndef LED_H_
 #define LED_H_
 
+void flash_builtin(int period = 1000, int n_flashes = 5);
+
 class LED {
 public:
 	LED(int pin_number);
