@@ -8,7 +8,7 @@
 #ifndef RABBIT_H_
 #define RABBIT_H_
 
-#include "Arduino.h"
+#include "Arduino.h" //for String
 
 class Rabbit {
 public:

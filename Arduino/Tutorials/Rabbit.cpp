@@ -6,7 +6,9 @@
  */
 
 #include "Rabbit.h"
+#include "Arduino.h" // for serial
 
 String Rabbit::do_something() {
+	Serial.println("rabbit rabbit rabbit");
 	return "boinggg";
 }
