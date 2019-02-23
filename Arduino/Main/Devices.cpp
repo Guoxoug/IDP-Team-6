@@ -5,7 +5,7 @@
  *      Author: Guy
  */
 
-#include "LED.h"
+#include "Devices.h"
 #include "Arduino.h"
 
 void flash_builtin(int period = 1000, int n_flashes = 5) {
@@ -14,21 +14,19 @@ void flash_builtin(int period = 1000, int n_flashes = 5) {
 		light.toggle();
 		delay(period);
 	}
-
 }
 
 void LED::set_state(int new_state) {
 	state = new_state;
-	digitalWrite(pin_number, new_state);
+	digitalWrite(pin, new_state);
 }
 
 void LED::toggle() {
 	LED::set_state(!state);
 }
 
-LED::LED(int pin_n) {
+LED::LED(int pin_n) { //runs after default IO constructor
 	pinMode(pin_n, OUTPUT);
-	set_state(false); //default on
-	pin_number = pin_n;
+	set_state(state); //default on
 }
 
