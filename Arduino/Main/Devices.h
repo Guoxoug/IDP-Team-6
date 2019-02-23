@@ -25,7 +25,10 @@ private:
 	bool state;
 
 public:
-	LED(int pin_number): IO(pin_number){;}
+	LED(int pin_number): IO(pin_number){
+		pinMode(pin, OUTPUT);
+		set_state(state); //default on
+	}
 	void set_state(int new_state);
 	void toggle();
 

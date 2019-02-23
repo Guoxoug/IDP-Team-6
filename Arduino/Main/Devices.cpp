@@ -25,8 +25,8 @@ void LED::toggle() {
 	LED::set_state(!state);
 }
 
-LED::LED(int pin_n) { //runs after default IO constructor
-	pinMode(pin_n, OUTPUT);
-	set_state(state); //default on
-}
+//LED::LED(int pin_n): IO(pin_number){ //runs after default IO constructor
+//	pinMode(pin_n, OUTPUT);
+//	set_state(state); //default on
+//}
 
