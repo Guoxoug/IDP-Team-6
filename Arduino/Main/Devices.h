@@ -15,7 +15,9 @@ void flash_builtin(int period = 1000, int n_flashes = 5);
 class IO {
 	//Base class to define any sort of input/output by associating it with a pin
 public:
-	IO(int pin_number): pin(pin_number){;} //Parameterised constructor, used to set pin
+	IO(int pin_number): pin(pin_number){
+		Serial.println("IO constructor");
+	} //Parameterised constructor, used to set pin
 	void print_pin_info() {Serial.println(pin);}
 	int pin;
 };
@@ -26,6 +28,7 @@ private:
 
 public:
 	LED(int pin_number): IO(pin_number){
+		Serial.println("LED constructor");
 		pinMode(pin, OUTPUT);
 		set_state(state); //default on
 	}
