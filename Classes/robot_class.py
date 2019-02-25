@@ -12,6 +12,7 @@ class Robot():
 
     def update_position(self):
         """Updates the position of the robot using the self.front and self.back circles"""
+        #some function camera.update_robot()
         pass
 
     def find_next_target(self):
