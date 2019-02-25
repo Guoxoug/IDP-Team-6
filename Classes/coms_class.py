@@ -21,10 +21,10 @@ class Coms():
         #serial something
 
     #Below are the translation functions using scheme above
-    def turn(self, power):
+    def translate_turn(self, power):
         """Sends signal to arduino to set the motor to the specified power"""
         #translate into, pin number
 
-    def forward(self, power):
+    def translate_forward(self, power):
         """Updates the position of the block"""
         position = new_position
