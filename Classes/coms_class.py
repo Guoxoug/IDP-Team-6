@@ -1,3 +1,5 @@
+from init_connection import initialise_connection
+
 """General Idea:
 Function           |Num     Parameter    e.g. forward 50%: b(1) b(0.5) so one byte for num then 1 for parameter
 -----------------------------------------
@@ -13,18 +15,31 @@ infra_red request  | 5      None
 
 """
 class Coms():
-    def __init__(self, position, id):
+    """All messages are """
+    def __init__(self, serial):
         """Sets up a communication object"""
-        self.open = False
+        self.serial = serial  # Serial object
 
     def send(self, message):
-        #serial something
+        # serial something
+        # message in bytes
+        self.serial.write(message)
 
     #Below are the translation functions using scheme above
     def translate_turn(self, power):
-        """Sends signal to arduino to set the motor to the specified power"""
-        #translate into, pin number
+        """"""
 
-    def translate_forward(self, power):
-        """Updates the position of the block"""
-        position = new_position
+    def motor(self, power):
+        #  power is between -100 and 100
+        #  power to arduino func takes 0 - 7
+        if power >= 0:
+            motor_direction = "f"
+            input_power = str(round(power / 100 * 7))
+            command = motor_direction + input_power + "\n"  # newline indicates end of command to arduino
+            self.serial.write(bytes(command, "utf-8"))  # single character
+        if power < 0:
+            motor_direction = "b"
+            input_power = str(round(-power/100*7))
+            command = motor_direction + input_power + "\n"
+            self.serial.write(bytes(command, "utf-8"))  # two character string
+
