@@ -1,10 +1,10 @@
 class Robot():
-    def __init__(self, position):
+    def __init__(self):
         """Sets up a Robot object"""
         self.position = position
-        self.target = None  #Can assign block object
-        self.front = None
-        self.back = None
+        self.target = False  #Can assign block object
+        self.front = False
+        self.back = False
         self.orientation = 0
         self.distance = 0
         self.num_tested = 0
@@ -12,6 +12,7 @@ class Robot():
 
     def update_position(self):
         """Updates the position of the robot using the self.front and self.back circles"""
+        #some function camera.update_robot()
         pass
 
     def find_next_target(self):
@@ -38,12 +39,16 @@ class Robot():
         pass
 
     def turn(self):
+        """
         angle = get_orientation()
         while angle > margin:
             robocoms(turn, 50%)  #later the percentage can be decided by a controller
             update_position()
             angle = get_orientation()
         robocoms(turn, False)
+        """
+        pass
 
     def __repr__(self):
-        return "Robot\n position: {}\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}".format(self.position, self.target.position, self.orientation, self.distance, self.num_tested, self.num_picked_up)
+        return "Robot\n position: {}\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}".format(self.position) #, self.target, self.orientation, self.distance, self.num_tested, self.num_picked_up)
+        #\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}"

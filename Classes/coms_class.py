@@ -10,15 +10,16 @@ infra_red request  | 5      None
 
 
 
-
 """
+
 class Coms():
-    def __init__(self, position, id):
+    def __init__(self):
         """Sets up a communication object"""
         self.open = False
 
     def send(self, message):
         #serial something
+        pass
 
     #Below are the translation functions using scheme above
     def translate_turn(self, power):
