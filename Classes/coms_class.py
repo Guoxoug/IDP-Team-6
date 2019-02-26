@@ -10,17 +10,18 @@ infra_red request  | 5      None
 
 
 
-
 """
+
 class Coms():
-    def __init__(self, position, id):
+    def __init__(self):
         """Sets up a communication object"""
         self.open = False
 
     def send(self, message):
         #serial something
+        pass
 
-    #Below are the translation functions using scheme above
+    #Below are the TRANSLATION functions using scheme above
     def turn(self, power):
         """Sends signal to arduino to set the motor to the specified power"""
         #translate into, pin number
