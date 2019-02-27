@@ -49,6 +49,7 @@ if __name__ == "__main__":
     name = locate_port().device  # finds port connected to board (Arduino resets on connection)
     arduino_port = serial.Serial(name, 9600, timeout=5)  # 5 second timout for read method
     handshake(arduino_port)
+
     arduino_port.write(b"J")
     print("received: ", arduino_port.read().decode("utf-8"))
     arduino_port.close()

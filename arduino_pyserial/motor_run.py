@@ -8,11 +8,16 @@ initialise_connection.handshake(arduino_port)
 
 arduino_coms = coms_class.Coms(arduino_port)
 
-arduino_coms.motor(50)
+arduino_coms.forward(100)
+time.sleep(2)
+arduino_coms.backward(100)
+time.sleep(2)
+arduino_coms.turn(100, "clockwise")
+time.sleep(2)
+arduino_coms.turn(100, "anticlockwise")
+time.sleep(2)
+arduino_coms.stop()
 
-time.sleep(5)
-
-arduino_coms.motor(-1)
 
 arduino_port.close()
 print("port closed")

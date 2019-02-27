@@ -9,9 +9,9 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61); 
 
 // Select which 'port' M1, M2, M3 or M4. In this case, M1
-Adafruit_DCMotor *myMotor = AFMS.getMotor(1);
+Adafruit_DCMotor *right_motor = AFMS.getMotor(1);
 // You can also make another motor on port M2
-//Adafruit_DCMotor *myOtherMotor = AFMS.getMotor(2);
+Adafruit_DCMotor *left_motor = AFMS.getMotor(2);
 
 void establishContact();
 String input_command = "";         // a String to hold incoming data
@@ -38,17 +38,36 @@ void setup() {
 
 void loop() {
     if (string_complete) {
+    //Serial.print(input_command + 'g');
    switch(input_command[0]){
-    case 'f' : 
-    //guys_motor_function(int(input_command[1]));
-    digitalWrite(LED_BUILTIN, HIGH);
-    basic_motor(255);
-    
-    break;
+    case 'a' : 
+      //guys_motor_function(int(input_command[1]));
+      //digitalWrite(LED_BUILTIN, HIGH);
+      right_motor_forward(int(input_command[1]-'0')*255/7); 
+      /* IMPORTANT Char type in c++ is just an integer, so to get the integer value do char - '0'
+       *  Also be careful with integer calculations, remember that division is floored
+       */
+      Serial.print(int(input_command[1]-'0')*255/7);
+
+      break;
     case 'b' :
-    digitalWrite(LED_BUILTIN, LOW); 
+      //digitalWrite(LED_BUILTIN, LOW); 
+      //guys_other_motor_function(int(input_command[1]));
+     
+      right_motor_backward(int(input_command[1]-'0')*255/7);
+      break;
+    case 'c' : 
+      //guys_motor_function(int(input_command[1]));
+      //digitalWrite(LED_BUILTIN, HIGH);
+       left_motor_forward(int(input_command[1]-'0')*255/7);
+       Serial.print(int(input_command[1]-'0')*255/7);
+      
+      break;
+    case 'd' :
+    //digitalWrite(LED_BUILTIN, LOW); 
   //guys_other_motor_function(int(input_command[1]));
-    basic_motor(0);
+   
+     left_motor_backward(int(input_command[1]-'0')*255/7);
     break;
     
     default :;
@@ -62,6 +81,7 @@ void loop() {
 
 
 void serialEvent() {
+  //This is where commands come in
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
@@ -108,10 +128,31 @@ void establishContact() {
     }
 }
 
-void basic_motor(int power){
- myMotor->setSpeed(power);
-  myMotor->run(FORWARD);
+void right_motor_forward(int power){
+ right_motor->setSpeed(power);
+  right_motor->run(FORWARD);
   // turn on motor
-  myMotor->run(RELEASE); 
-  myMotor->run(FORWARD);
+  right_motor->run(RELEASE); 
+  right_motor->run(FORWARD);
+}
+void right_motor_backward(int power){
+ right_motor->setSpeed(power);
+  right_motor->run(BACKWARD);
+  // turn on motor
+  right_motor->run(RELEASE); 
+  right_motor->run(BACKWARD);
+}
+void left_motor_forward(int power){
+ left_motor->setSpeed(power);
+  left_motor->run(FORWARD);
+  // turn on motor
+  left_motor->run(RELEASE); 
+  left_motor->run(FORWARD);
+}
+void left_motor_backward(int power){
+ left_motor->setSpeed(power);
+  left_motor->run(BACKWARD);
+  // turn on motor
+  left_motor->run(RELEASE); 
+  left_motor->run(BACKWARD);
 }

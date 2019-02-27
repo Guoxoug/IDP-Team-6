@@ -25,21 +25,54 @@ class Coms():
         # message in bytes
         self.serial.write(message)
 
-    #Below are the translation functions using scheme above
-    def translate_turn(self, power):
-        """"""
 
-    def motor(self, power):
+
+    def motor(self, power: int, motor_name: str):
+        #  takes power and motor name (right, left)  as parameters
         #  power is between -100 and 100
         #  power to arduino func takes 0 - 7
-        if power >= 0:
-            motor_direction = "f"
-            input_power = str(round(power / 100 * 7))
-            command = motor_direction + input_power + "\n"  # newline indicates end of command to arduino
-            self.serial.write(bytes(command, "utf-8"))  # single character
-        if power < 0:
-            motor_direction = "b"
-            input_power = str(round(-power/100*7))
-            command = motor_direction + input_power + "\n"
-            self.serial.write(bytes(command, "utf-8"))  # two character string
+        if motor_name == "right":
+            if power >= 0:
+                input_power = str(round(power / 100 * 7))
+                command = "a" + input_power + "\n"   # newline indicates end of command to arduino
+                self.serial.write(bytes(command, "utf-8"))
+                print("command", bytes(command, "utf-8"))# single character
+            elif power < 0:
+                input_power = str(round(-power/100*7))
+                command = "b" + input_power + "\n"
+                self.serial.write(bytes(command, "utf-8"))
+                print("command", bytes(command, "utf-8"))# two character string
+        if motor_name == "left":
+            if power >= 0:
+                input_power = str(round(power / 100 * 7))
+                command = "c" + input_power + "\n"# newline indicates end of command to arduino
+                self.serial.write(bytes(command, "utf-8"))
+                print("command", bytes(command, "utf-8"))# single character
+            elif power < 0:
+                input_power = str(round(-power/100*7))
+                command = "d" + input_power + "\n"
+                self.serial.write(bytes(command, "utf-8"))
+                print("command", bytes(command, "utf-8"))# two character string
 
+    # Movement methods
+    # Self explanatory ^^
+    # power always int 0-100
+    def forward(self, power):
+        self.motor(power, "right")
+        self.motor(power, "left")
+
+    def backward(self, power):
+        self.motor(-power, "right")
+        self.motor(-power, "left")
+
+    def turn(self, power, direction: str):
+        if direction == "clockwise":
+            self.motor(-power, "right")
+            self.motor(power, "left")
+        if direction == "anticlockwise":
+            self.motor(power, "right")
+            self.motor(-power, "left")
+
+    def stop(self):
+        self.motor(0, "right")
+        self.motor(0, "left")
