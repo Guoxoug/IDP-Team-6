@@ -29,7 +29,7 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-// initialize digital pin LED_BUILTIN as an output.
+// Initialise digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   input_command.reserve(200);
 
