@@ -7,8 +7,11 @@
 
 #include "DeviceControllers.h"
 #include "Arduino.h"
+#include "Adafruit_MotorShield.h"
 
 const int max_arg = 8;
+Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+
 
 IO::IO(int pin_number){ //Parameterised constructor for generic IO
 	pin = pin_number;
@@ -27,4 +30,14 @@ LED::LED(int pin_number) : IO(pin_number){
 void LED::set_power(int val){//Expects Low or High, 0 or 1
 	//int digital_state = map( val, 0, max_arg, 0, 1);
 	digitalWrite(pin, val);
+}
+
+DCMotor::DCMotor(int motor_port, int dir) : IO(motor_port){
+	motor = AFMS.getMotor(motor_port);
+	direction = dir;
+}
+
+void DCMotor::set_power(int power){
+	motor->setSpeed(power);
+	motor->run(direction);
 }
