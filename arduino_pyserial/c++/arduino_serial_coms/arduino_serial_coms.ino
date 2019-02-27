@@ -41,12 +41,12 @@ void loop() {
    switch(input_command[0]){
     case 'f' : 
     //guys_motor_function(int(input_command[1]));
-    //digitalWrite(LED_BUILTIN, HIGH);
-    basic_motor(50);
+    digitalWrite(LED_BUILTIN, HIGH);
+    basic_motor(255);
     
     break;
     case 'b' :
-    //digitalWrite(LED_BUILTIN, LOW); 
+    digitalWrite(LED_BUILTIN, LOW); 
   //guys_other_motor_function(int(input_command[1]));
     basic_motor(0);
     break;
@@ -80,6 +80,8 @@ void serialEvent() {
 
 
 void establishContact() {
+    // written mostly get familiar with 
+    
     //THIS FUNC IN SETUP, "handshake" in python immediately after port connection established
     Serial.write("hello"); // send handshake message
     int counter = 0;
