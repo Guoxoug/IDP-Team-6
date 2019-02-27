@@ -22,4 +22,6 @@ Arduino Python interface
     Probably same deal on PC  side but none issue since buffer will be much larger
 
     bytes([0]) makes a byte that is converted to int 0  in the arduino
-    
+
+    serialEvent:
+        function that is called when data is available in buffer
