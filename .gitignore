@@ -1,0 +1,12 @@
+
+*.prefs
+
+Arduino/\.settings/
+
+Arduino/Devices/\.settings/
+
+Arduino/Devices/\.project
+
+*.mk
+
+Arduino/Motors/Release/makefile
