@@ -10,3 +10,7 @@ Arduino/Devices/\.project
 *.mk
 
 Arduino/Motors/Release/makefile
+
+Arduino/Motors/\.cproject
+
+Arduino/Devices/\.cproject
