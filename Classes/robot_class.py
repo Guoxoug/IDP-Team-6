@@ -1,7 +1,7 @@
 class Robot():
     def __init__(self):
         """Sets up a Robot object"""
-        self.position = position
+        self.position = False
         self.target = False  #Can assign block object
         self.front = False
         self.back = False
