@@ -38,7 +38,11 @@ DCMotor::DCMotor(int motor_port, int dir) : IO(motor_port){
 	direction = dir;
 }
 
+<<<<<<< master
 void DCMotor::set_state(int power){
+=======
+void DCMotor::set_power(int power){
+>>>>>>> Fix motor definition
 	motor->setSpeed(power);
 	motor->run(direction);
 }
