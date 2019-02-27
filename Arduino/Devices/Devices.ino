@@ -24,16 +24,17 @@ void IO::print_pin_state(){
 class LED: public IO { //Subclass IO
 public:
 	LED(int pin_number); //default on
-	void set_power(int val){//Expects Low or High, 0 or 1
-		//int digital_state = map( val, 0, max_arg, 0, 1);
-		digitalWrite(pin, val);
-
-	}
+	void set_power(int val);
 };
 
 LED::LED(int pin_number) : IO(pin_number){
 	Serial.println("LED constructor");
 	pinMode(pin, OUTPUT);
+}
+
+void LED::set_power(int val){//Expects Low or High, 0 or 1
+	//int digital_state = map( val, 0, max_arg, 0, 1);
+	digitalWrite(pin, val);
 }
 
 //IO genericIO = new IO(LED_BUILTIN);
