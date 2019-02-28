@@ -44,11 +44,12 @@ class Camera():
         blue = (210, 0.52, 0.87)
         red = (1, 0.44, 0.93)
         green = (165, 0.79, 0.64)
-        purple = (344, 0.45, 0.46)  # Change! RGB 234, 12, 208
+        purple = (345, 0.26, 0.49)  # Change! RGB 234, 12, 208
         orange = (31, 0.60, 0.73)  # RGB 226, 183, 0
+        dark_green = (178, 0.21, 0.60)
 
         # Create dictionary of "colour": (lower_colour, upper_colour) where each are tuple len=3
-        colour_dict = {"orange": (((orange[0] - 10) * 0.5, 255 * max(orange[1] - 0.2, 0), 255 * max(orange[2] - 0.2, 0)), ((orange[0] + 10) * 0.5, 255 * min(orange[1] + 0.2, 1), 255 * min(orange[2] + 0.2, 1))), "purple": (((purple[0] - 10) * 0.5, 255 * max(purple[1] - 0.2, 0), 255 * max(purple[2] - 0.2, 0)), ((purple[0] + 10) * 0.5, 255 * min(purple[1] + 0.2, 1), 255 * min(purple[2] + 0.2, 1))), "blue": (((blue[0] - 10) * 0.5, 255 * max(blue[1] - 0.2, 0), 255 * max(blue[2] - 0.2, 0)), ((blue[0] + 10) * 0.5, 255 * min(blue[1] + 0.2, 1), 255 * min(blue[2] + 0.2, 1))), "green": (((green[0] - 10) * 0.5, 255 * max(green[1] - 0.2, 0), 255 * max(green[2] - 0.2, 0)), ((green[0] + 10) * 0.5, 255 * min(green[1] + 0.2, 1), 255 * min(green[2] + 0.2, 1))), "red": (((red[0] - 10) * 0.5, 255 * max(red[1] - 0.2, 0), 255 * max(red[2] - 0.2, 0)), ((red[0] + 10) * 0.5, 255 * min(red[1] + 0.2, 1), 255 * min(red[2] + 0.2, 1)))}
+        colour_dict = {"dark_green": (((dark_green[0] - 10) * 0.5, 255 * max(dark_green[1] - 0.1, 0), 255 * max(dark_green[2] - 0.1, 0)), ((dark_green[0] + 10) * 0.5, 255 * min(dark_green[1] + 0.1, 1), 255 * min(dark_green[2] + 0.1, 1))), "orange": (((orange[0] - 10) * 0.5, 255 * max(orange[1] - 0.2, 0), 255 * max(orange[2] - 0.2, 0)), ((orange[0] + 10) * 0.5, 255 * min(orange[1] + 0.2, 1), 255 * min(orange[2] + 0.2, 1))), "purple": (((purple[0] - 10) * 0.5, 255 * max(purple[1] - 0.1, 0), 255 * max(purple[2] - 0.1, 0)), ((purple[0] + 10) * 0.5, 255 * min(purple[1] + 0.1, 1), 255 * min(purple[2] + 0.1, 1))), "blue": (((blue[0] - 10) * 0.5, 255 * max(blue[1] - 0.2, 0), 255 * max(blue[2] - 0.2, 0)), ((blue[0] + 10) * 0.5, 255 * min(blue[1] + 0.2, 1), 255 * min(blue[2] + 0.2, 1))), "green": (((green[0] - 10) * 0.5, 255 * max(green[1] - 0.2, 0), 255 * max(green[2] - 0.2, 0)), ((green[0] + 10) * 0.5, 255 * min(green[1] + 0.2, 1), 255 * min(green[2] + 0.2, 1))), "red": (((red[0] - 10) * 0.5, 255 * max(red[1] - 0.2, 0), 255 * max(red[2] - 0.2, 0)), ((red[0] + 10) * 0.5, 255 * min(red[1] + 0.2, 1), 255 * min(red[2] + 0.2, 1)))}
 
         mask = cv2.inRange(hsv, np.array(colour_dict[colour][0]), np.array(colour_dict[colour][1]))
 
@@ -102,12 +103,30 @@ class Camera():
     def update_robot(self, robot):
         """Updates the position of the robot"""
         hsv, frame = self.take_shot()
+
         blurred_purple = self.apply_mask(hsv, "purple")
-        cnts = self.find_centroid(blurred_purple)
+        blurred_darkgreen = self.apply_mask(hsv, "dark_green")
 
-        good_c = list(filter(lambda x: cv2.contourArea(x) > 300, cnts))
+        cnts_purple = self.find_centroid(blurred_purple)
+        cnts_darkgreen = self.find_centroid(blurred_darkgreen)
 
-        for c in good_c:
+        print("Length purple", len(cnts_purple))
+        good_c_purple = list(filter(lambda x: cv2.contourArea(x) > 600, cnts_purple))
+        good_c_darkgreen = list(filter(lambda x: cv2.contourArea(x) > 400, cnts_darkgreen))
+        print("Length good purple", len(good_c_purple))
+        print("Length good darkgreen", len(good_c_darkgreen))
+        #FOR TESTING MAINLY SAVING IMAGE AND DISPLAYING IT
+        for c in good_c_purple:
+            # draw the contour and center of the shape on the image
+            cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
+            cv2.circle(frame, self.calculate_moment(c), 3, (255, 0, 255), -1)
+
+            # show the image
+            cv2.imshow("Image with locations", frame)
+            #cv2.imwrite("frame_drawn_on.png", frame)
+            cv2.waitKey(5)
+
+        for c in good_c_darkgreen:
             # draw the contour and center of the shape on the image
             cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
             cv2.circle(frame, self.calculate_moment(c), 3, (255, 0, 255), -1)
@@ -117,18 +136,14 @@ class Camera():
             cv2.imwrite("frame_drawn_on.png", frame)
             cv2.waitKey(5)
 
-        if len(good_c) > 1:
-            print("ValueError(You fucked it, multiple contours for front/purple found)")
-        robot.front = self.calculate_moment(good_c[0])
-        """
-        blurred_orange = apply_mask(hsv, "orange")
-        centroid_back = find_centroid(blurred_orange)
-        if len(centroid_back) > 1:
-            raise ValueError("You fucked it, multiple contours for back/orange found")
-        robot.back = centroid_back[0]
-        """
+        if len(good_c_purple) == 1 and len(good_c_darkgreen) == 1:
+            robot.back = self.calculate_moment(good_c_purple[0])
+            robot.front = self.calculate_moment(good_c_darkgreen[0])
+            print("Robot position updated", robot.front, robot.back)
+            return True
 
-        print("Robot position updated", robot.front)
+        else:
+            return False
 
     def init_blocks(self):
         """Initialises the blocks"""
