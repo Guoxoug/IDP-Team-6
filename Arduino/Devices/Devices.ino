@@ -14,10 +14,14 @@ void setup() {
   Serial.begin(9600);           //Start serial and set the correct Baud Rate
   AFMS.begin();
 <<<<<<< master
+<<<<<<< master
   led = new LED(LED_BUILTIN); //these declarations must come after Serial
 =======
   led = new LED(LED_BUILTIN);
 >>>>>>> Getting motor test running
+=======
+  led = new LED(LED_BUILTIN); //these declarations must come after Serial
+>>>>>>> Class test code
   led->print_pin_state();
   right_fwd = new DCMotor(1,FORWARD);
   right_fwd->print_pin_state();
@@ -26,6 +30,7 @@ void setup() {
 void loop() {
 	//genericIO.print_pin_state();
 	//do some blinking
+<<<<<<< master
 <<<<<<< master
 	led->set_state(HIGH);
 	delay(1000);
@@ -75,11 +80,16 @@ void loop() {
 //}
 >>>>>>> Fix motor definition
 =======
+=======
+	led->set_power(HIGH);
+	delay(1000);
+	led->set_power(LOW);
+	delay(1000);
+>>>>>>> Class test code
 
 	//do some motoring
 
-	uint8_t i;
-
+	int i;
 	Serial.println("tick");
 
 	led->set_power(HIGH);
