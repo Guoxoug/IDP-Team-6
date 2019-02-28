@@ -19,6 +19,7 @@ IO::IO(int pin_number){ //Parameterised constructor for generic IO
 }
 
 void IO::print_pin_state(){
+	Serial.print("IO is located on pin/port: ");
 	Serial.println(pin);
 }
 
