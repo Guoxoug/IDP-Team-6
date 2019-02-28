@@ -1,3 +1,5 @@
+import numpy as np
+
 class Robot():
     def __init__(self):
         """Sets up a Robot object"""
@@ -25,10 +27,22 @@ class Robot():
         #should be linked with get_orientation
         pass  #use self.target
 
-    def get_orientation(self, Block):
+    def get_orientation(self, camera):
         """Gets the orientation of itself relative to Block using angle between line of circle-circle and centre-circle"""
         #always call update_position before this
-        pass  #use self.target
+        camera.update_robot(self)
+        print("Position updated")
+
+        robot_vector = self.front-self.back
+        robot_block_vector = self.target.position-self.front
+
+        cos_angle = np.dot(robot_vector, robot_block_vector) / (np.linalg.norm(robot_vector) * np.linalg.norm(robot_block_vector))
+        angle = np.arccos(cos_angle)
+        print("Angle is:", np.degrees(angle))
+
+        self.orientation = angle
+
+        return angle  #use self.target
 
     def move_forward(self):
         """Moves the robot forward"""
@@ -40,7 +54,7 @@ class Robot():
 
     def turn(self):
         """
-        angle = get_orientation()
+        angle = self.get_orientation(camera, self.target)
         while angle > margin:
             robocoms(turn, 50%)  #later the percentage can be decided by a controller
             update_position()
