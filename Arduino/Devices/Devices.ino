@@ -9,7 +9,7 @@ DCMotor* right_fwd;
 void setup() {
   Serial.begin(9600);           //Start serial and set the correct Baud Rate
   AFMS.begin();
-  led = new LED(LED_BUILTIN);
+  led = new LED(LED_BUILTIN); //these declarations must come after Serial
   led->print_pin_state();
   right_fwd = new DCMotor(1,FORWARD);
   right_fwd->print_pin_state();
@@ -18,15 +18,14 @@ void setup() {
 void loop() {
 	//genericIO.print_pin_state();
 	//do some blinking
-//	led->set_power(HIGH);
-//	delay(1000);
-//	led->set_power(LOW);
-//	delay(1000);
+	led->set_power(HIGH);
+	delay(1000);
+	led->set_power(LOW);
+	delay(1000);
 
 	//do some motoring
 
-	uint8_t i;
-
+	int i;
 	Serial.println("tick");
 
 	led->set_power(HIGH);
