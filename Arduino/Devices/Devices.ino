@@ -24,4 +24,19 @@ void loop() {
 //	delay(1000);
 
 	//do some motoring
+
+	uint8_t i;
+
+	Serial.println("tick");
+
+	led->set_power(HIGH);
+	for (i=0; i<255; i++) {
+		right_fwd->set_power(i);
+		delay(10);
+	}
+	led->set_power(LOW);
+	for (i=255; i!=0; i--) {
+		right_fwd->set_power(i);
+		delay(10);
+	}
 }
