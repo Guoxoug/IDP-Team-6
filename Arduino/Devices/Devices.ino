@@ -1,4 +1,7 @@
 <<<<<<< master
+<<<<<<< master
+=======
+>>>>>>> Getting motor test running
 #include "Arduino.h"
 #include "DeviceControllers.h"
 
@@ -10,7 +13,11 @@ DCMotor* right_fwd;
 void setup() {
   Serial.begin(9600);           //Start serial and set the correct Baud Rate
   AFMS.begin();
+<<<<<<< master
   led = new LED(LED_BUILTIN); //these declarations must come after Serial
+=======
+  led = new LED(LED_BUILTIN);
+>>>>>>> Getting motor test running
   led->print_pin_state();
   right_fwd = new DCMotor(1,FORWARD);
   right_fwd->print_pin_state();
@@ -19,6 +26,7 @@ void setup() {
 void loop() {
 	//genericIO.print_pin_state();
 	//do some blinking
+<<<<<<< master
 	led->set_state(HIGH);
 	delay(1000);
 	led->set_state(LOW);
@@ -57,9 +65,17 @@ void loop() {
 //void loop() {
 //	//genericIO.print_pin_state();
 //	//do some blinking
+=======
+>>>>>>> Getting motor test running
 //	led->set_power(HIGH);
 //	delay(1000);
 //	led->set_power(LOW);
 //	delay(1000);
+<<<<<<< master
 //}
 >>>>>>> Fix motor definition
+=======
+
+	//do some motoring
+}
+>>>>>>> Getting motor test running
