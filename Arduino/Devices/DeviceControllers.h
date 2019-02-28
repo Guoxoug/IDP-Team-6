@@ -10,6 +10,8 @@
 
 #include "Adafruit_MotorShield.h"
 
+extern Adafruit_MotorShield AFMS;
+
 class IO {
 	//Base class to define any sort of input/output by associating it with a pin
 public:
