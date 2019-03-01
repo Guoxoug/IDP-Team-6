@@ -76,7 +76,7 @@ void loop() {
     break;
 
     default :;
- }
+   }
     // clear the string:
     input_command = "";
     string_complete = false;

@@ -15,6 +15,7 @@ void setup() {
   AFMS.begin();
 <<<<<<< master
 <<<<<<< master
+<<<<<<< master
   led = new LED(LED_BUILTIN); //these declarations must come after Serial
 =======
   led = new LED(LED_BUILTIN);
@@ -23,8 +24,14 @@ void setup() {
   led = new LED(LED_BUILTIN); //these declarations must come after Serial
 >>>>>>> Class test code
   led->print_pin_state();
+=======
+
+  led = new LED(LED_BUILTIN); //these declarations must come after Serial & AFMS
+  led->print_device_location();
+>>>>>>> Sensor base class
   right_fwd = new DCMotor(1,FORWARD);
-  right_fwd->print_pin_state();
+  right_fwd->print_device_location();
+
 }
 
 void loop() {

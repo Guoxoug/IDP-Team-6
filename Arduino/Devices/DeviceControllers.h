@@ -23,14 +23,27 @@ class IO {
 public:
 	IO(int pin_number);
 	int pin;
+<<<<<<< master
 	void print_pin_state();
 <<<<<<< master
 	virtual void set_power(int power) = 0;
 <<<<<<< master
 =======
 >>>>>>> Refactor name of function
+=======
+	void print_device_location();
+>>>>>>> Sensor base class
 	virtual void set_state(int power) = 0;
 };
+
+class Sensor: public IO {
+	//base class extends IO to make it output a value
+public:
+	Sensor(int pin);
+	virtual int read_state() = 0;
+	virtual bool state_changed() = 0;
+};
+
 
 
 class LED: public IO {//subclass IO
@@ -64,6 +77,7 @@ public:
 	void set_state(int power);
 };
 
+<<<<<<< master
 class Button: public IO {//subclass IO
 public:
 	Button(int pin_number);
@@ -73,6 +87,9 @@ public:
 	void set_power(int val);
 >>>>>>> Extract device controlling into separate files
 };
+=======
+
+>>>>>>> Sensor base class
 
 class DCMotor: public IO {
 private:
