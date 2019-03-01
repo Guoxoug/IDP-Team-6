@@ -14,6 +14,7 @@ infra_red request  | 5      None
 
 
 """
+import numpy as np
 class Coms():
     """All messages are """
     def __init__(self, serial):
@@ -63,11 +64,11 @@ class Coms():
         self.motor(-power, "right")
         self.motor(-power, "left")
 
-    def turn(self, power, direction: str):
-        if direction == "clockwise":
+    def turn(self, power):
+        if np.sign(power) == -1:
             self.motor(-power, "right")
             self.motor(power, "left")
-        if direction == "anticlockwise":
+        else:
             self.motor(power, "right")
             self.motor(-power, "left")
 

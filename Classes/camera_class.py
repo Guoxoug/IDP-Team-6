@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from .block_class import Block
+from .processing_functions import decompose_matrix
 
 
 class Camera():
@@ -10,6 +11,17 @@ class Camera():
     x, y = np.meshgrid(np.arange(0, X), np.arange(0, Y))
     condition = (x < 10) | (x > X - 20) | ((x > 586) & (y > 160) & (y < 274)) | ((x > 313) & (x < 322)) | ((x > 430) & (y < 50))  # | (y < 10) | (y > Y-10)
 
+    robot_query = cv2.imread('robot_query_2.png', 0)
+
+    # Initiate SIFT detector
+    sift = cv2.xfeatures2d.SIFT_create()
+    surf = cv2.xfeatures2d.SURF_create(400)
+
+    FLANN_INDEX_KDTREE = 0
+    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+    search_params = dict(checks=50)
+
+    flann = cv2.FlannBasedMatcher(index_params, search_params)
 
     def __init__(self):
         """Sets up a camera object and gives some pre-determined functions"""
@@ -20,22 +32,20 @@ class Camera():
     def take_shot(self):
         """Takes a single shot and returns the hsv image"""
         print("Taking shot")
-        i = 0
-        while(i < 2):
-            _, frame = self.cap.read()
 
-            #cv2.imshow("Image with locations", frame)
-            #cv2.waitKey(5)
+        _, frame = self.cap.read()
+        _, frame = self.cap.read()
 
-            # Convert BGR to HSV
-            frame[self.condition] = 0
-            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        #cv2.imshow("Image with locations", frame)
+        #cv2.waitKey(5)
 
-            i += 1
+        # Convert BGR to HSV
+        frame[self.condition] = 0
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         cv2.imwrite("frame_saving_inside.png", frame)
 
-        return hsv, frame
+        return frame
 
     def apply_mask(self, hsv, colour):
         """Returns the blurred mask"""
@@ -73,62 +83,88 @@ class Camera():
 
         return cnts
 
-    def update_robot(self, robot):
-        """Updates the position of the robot"""
-        hsv, frame = self.take_shot()
+    def get_position_orientation_robot(self):
+        """Updates the position of the robot
 
-        blurred_purple = self.apply_mask(hsv, "purple")
-        blurred_darkgreen = self.apply_mask(hsv, "dark_green")
+        Returns (x,y) and angle in °
 
-        cnts_purple = self.find_contours(blurred_purple)
-        cnts_darkgreen = self.find_contours(blurred_darkgreen)
+        """
+        frame = self.take_shot()
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        print("Length purple", len(cnts_purple))
-        good_c_purple = list(filter(lambda x: cv2.contourArea(x) > 600, cnts_purple))
-        good_c_darkgreen = list(filter(lambda x: cv2.contourArea(x) > 400, cnts_darkgreen))
-        print("Length good purple", len(good_c_purple))
-        print("Length good darkgreen", len(good_c_darkgreen))
-        #FOR TESTING MAINLY SAVING IMAGE AND DISPLAYING IT
-        for c in good_c_purple:
-            # draw the contour and center of the shape on the image
-            cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
-            cv2.circle(frame, self.calculate_moment(c), 3, (255, 0, 255), -1)
+        # find the keypoints and descriptors with SIFT
+        kp1, des1 = self.sift.detectAndCompute(self.robot_query, None)
+        kp2, des2 = self.sift.detectAndCompute(gray, None)
 
-            # show the image
-            cv2.imshow("Image with locations", frame)
-            #cv2.imwrite("frame_drawn_on.png", frame)
-            cv2.waitKey(5)
+        if des2 is None:
+            print("Connection lost, no descriptors found")
+            print("Retrying")
+            while (des2 == None):
+                _, frame = self.cap.read()
 
-        for c in good_c_darkgreen:
-            # draw the contour and center of the shape on the image
-            cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
-            cv2.circle(frame, self.calculate_moment(c), 3, (255, 0, 255), -1)
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            # show the image
-            cv2.imshow("Image with locations", frame)
-            cv2.imwrite("frame_drawn_on.png", frame)
-            cv2.waitKey(5)
+                # find the keypoints and descriptors with SIFT
+                kp1, des1 = self.sift.detectAndCompute(self.robot_query, None)
+                kp2, des2 = self.sift.detectAndCompute(gray, None)
 
-        if robot.target != False:
-            print("Printing target")
-            print(robot.target.position)
-            cv2.circle(frame, robot.target.position, 3, (255, 0, 255), -1)
-            cv2.imshow("Image with locations", frame)
+        matches = self.flann.knnMatch(des1, des2, k=2)
 
-        if len(good_c_purple) == 1 and len(good_c_darkgreen) == 1:
-            robot.back = np.array(self.calculate_moment(good_c_purple[0]))
-            robot.front = np.array(self.calculate_moment(good_c_darkgreen[0]))
-            print("Robot position updated", robot.front, robot.back)
-            return True
+        # store all the good matches as per Lowe's ratio test.
+        good = []
+        for m, n in matches:
+            if m.distance < 0.7 * n.distance:
+                good.append(m)
+
+        print("Good matches", len(good))
+
+        MIN_MATCH_COUNT = 17
+
+        if len(good) > MIN_MATCH_COUNT:
+            src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+            dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
+
+            M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+            matchesMask = mask.ravel().tolist()
+
+            scale, shear, angles, translate, perspective = decompose_matrix(M)
+            orientation = angles[2]
+
+            h, w = self.robot_query.shape
+            pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+            dst = cv2.perspectiveTransform(pts, M)
+
+            position = self.calculate_moment(dst)
+
+            print("Position robot:", position)
+            print("Orientation robot:", orientation)
+
+            gray = cv2.polylines(gray, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
+            cv2.circle(gray, position, 10, (255, 0, 255), -1)
 
         else:
-            return False
+            print("Not enough matches are found - {} {}".format(len(good), MIN_MATCH_COUNT))
+            matchesMask = None
+            self.get_position_orientation_robot()
+
+        draw_params = dict(matchColor=(0, 255, 0),  # draw matches in green color
+                           singlePointColor=None,
+                           matchesMask=matchesMask,  # draw only inliers
+                           flags=2)
+
+        img3 = cv2.drawMatches(self.robot_query, kp1, gray, kp2, good, None, **draw_params)
+
+        cv2.imshow("Image with matches", img3)
+        cv2.waitKey(5)
+
+        return np.array(position), orientation
 
     def init_blocks(self):
         """Initialises the blocks"""
         blocks = []
 
-        hsv, frame = self.take_shot()
+        frame = self.take_shot()
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         blurred_blue = self.apply_mask(hsv, "blue")
         cnts = self.find_contours(blurred_blue)
 
@@ -140,7 +176,7 @@ class Camera():
         i = 0
         for c in good_c:
             centroid = self.calculate_moment(c)
-            blocks.append(Block(centroid, i))
+            blocks.append(Block(np.array(centroid), i))
             i += 1
 
             # draw the contour and center of the shape on the image
