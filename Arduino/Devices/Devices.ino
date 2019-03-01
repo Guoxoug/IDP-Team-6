@@ -18,9 +18,9 @@ void setup() {
 void loop() {
 	//genericIO.print_pin_state();
 	//do some blinking
-	led->set_power(HIGH);
+	led->set_state(HIGH);
 	delay(1000);
-	led->set_power(LOW);
+	led->set_state(LOW);
 	delay(1000);
 
 	//do some motoring
@@ -28,14 +28,14 @@ void loop() {
 	int i;
 	Serial.println("tick");
 
-	led->set_power(HIGH);
+	led->set_state(HIGH);
 	for (i=0; i<255; i++) {
-		right_fwd->set_power(i);
+		right_fwd->set_state(i);
 		delay(10);
 	}
-	led->set_power(LOW);
+	led->set_state(LOW);
 	for (i=255; i!=0; i--) {
-		right_fwd->set_power(i);
+		right_fwd->set_state(i);
 		delay(10);
 	}
 }

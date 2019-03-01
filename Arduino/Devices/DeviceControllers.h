@@ -18,14 +18,20 @@ public:
 	IO(int pin_number);
 	int pin;
 	void print_pin_state();
-	virtual void set_power(int power) = 0;
+	virtual void set_state(int power) = 0;
 };
 
 
 class LED: public IO {//subclass IO
 public:
 	LED(int pin_number);
-	void set_power(int power);
+	void set_state(int power);
+};
+
+class Button: public IO {//subclass IO
+public:
+	Button(int pin_number);
+	void set_state(int power);
 };
 
 class DCMotor: public IO {
@@ -33,7 +39,7 @@ private:
 	int direction;
 public:
 	DCMotor(int motor_port, int direction);
-	void set_power(int power);
+	void set_state(int power);
 	Adafruit_DCMotor *motor;
 };
 
