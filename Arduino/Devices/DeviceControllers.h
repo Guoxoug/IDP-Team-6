@@ -38,10 +38,13 @@ public:
 
 class Sensor: public IO {
 	//base class extends IO to make it output a value
+private:
+	int old_state = 0; //everything starts off :)
+
 public:
 	Sensor(int pin);
 	virtual int read_state() = 0;
-	virtual bool state_changed() = 0;
+	bool state_changed();
 };
 
 
