@@ -8,6 +8,8 @@
 //IO genericIO = new IO(LED_BUILTIN);
 LED* led;
 DCMotor* right_fwd;
+Button* push_button;
+
 
 
 void setup() {
@@ -31,7 +33,7 @@ void setup() {
 >>>>>>> Sensor base class
   right_fwd = new DCMotor(1,FORWARD);
   right_fwd->print_device_location();
-
+  push_button = new Button(2);
 }
 
 void loop() {

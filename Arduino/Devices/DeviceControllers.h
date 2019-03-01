@@ -45,8 +45,15 @@ public:
 	Sensor(int pin);
 	virtual int read_state() = 0;
 	bool state_changed();
+	void set_state();//this function should be used to enable/disable a sensor
 };
 
+class Button : public Sensor {//could probably just be a digital sensor
+public:
+	//Button(int read_pin); //doesn't really need its own constructor, since sensor sets the pinmode
+	int read_state();
+	void set_state();//placeholder
+};
 
 
 class LED: public IO {//subclass IO

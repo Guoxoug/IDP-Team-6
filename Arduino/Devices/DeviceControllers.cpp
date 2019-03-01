@@ -28,10 +28,15 @@ Sensor::Sensor(int pin_number) : IO(pin_number){
 }
 
 bool Sensor::state_changed(){ //default state changed check is pretty literal
+	//if this works I'll be very impressed, considering read_state isn't defined yet
 	int new_state = read_state();
 	bool state_changed = (old_state != new_state);
 	old_state = new_state; //save for next time
 	return state_changed;
+}
+
+int Button::read_state(){
+	return digitalRead(pin);
 }
 
 LED::LED(int pin_number) : IO(pin_number){
