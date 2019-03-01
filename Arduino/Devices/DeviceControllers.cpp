@@ -23,6 +23,17 @@ void IO::print_device_location(){
 	Serial.println(pin);
 }
 
+Sensor::Sensor(int pin_number) : IO(pin_number){
+	pinMode(pin, INPUT);
+}
+
+bool Sensor::state_changed(){ //default state changed check is pretty literal
+	int new_state = read_state();
+	bool state_changed = (old_state != new_state);
+	old_state = new_state; //save for next time
+	return state_changed;
+}
+
 LED::LED(int pin_number) : IO(pin_number){
 	Serial.println("LED constructor");
 	pinMode(pin, OUTPUT);
