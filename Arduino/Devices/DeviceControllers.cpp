@@ -28,7 +28,7 @@ LED::LED(int pin_number) : IO(pin_number){
 	pinMode(pin, OUTPUT);
 }
 
-void LED::set_power(int val){//Expects Low or High, 0 or 1
+void LED::set_state(int val){//Expects Low or High, 0 or 1
 	//int digital_state = map( val, 0, max_arg, 0, 1);
 	digitalWrite(pin, val);
 }
@@ -38,7 +38,7 @@ DCMotor::DCMotor(int motor_port, int dir) : IO(motor_port){
 	direction = dir;
 }
 
-void DCMotor::set_power(int power){
+void DCMotor::set_state(int power){
 	motor->setSpeed(power);
 	motor->run(direction);
 }
