@@ -25,3 +25,23 @@ Arduino Python interface
 
     serialEvent:
         function that is called when data is available in buffer
+
+
+    Python buffer:
+        read given number of bytes from buffer
+        can read until specified byte
+        timeout: amount of time it waits for bytes to coming, exits after time runs out even if not all bytes read
+        stops script during timeout
+
+        Maybe: get number of bytes in read buffer (in_waiting()) and then read all of the bytes and reset_input_buffer()
+        Then decode and deal with separately at the start of each while loop
+
+        NEED ardunio output bytecode then
+
+
+    Calibration
+        get robot to drive from one end of the arena to the other
+        contact switches detect wall
+        measure distance using CV and time in Python
+        Get it to spin and use CV to calibrate
+
