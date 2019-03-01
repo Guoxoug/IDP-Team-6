@@ -18,7 +18,7 @@ IO::IO(int pin_number){ //Parameterised constructor for generic IO
 	Serial.println("IO constructor");
 }
 
-void IO::print_pin_state(){
+void IO::print_device_location(){
 	Serial.print("IO is located on pin/port: ");
 	Serial.println(pin);
 }

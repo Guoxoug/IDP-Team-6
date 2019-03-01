@@ -17,9 +17,18 @@ class IO {
 public:
 	IO(int pin_number);
 	int pin;
-	void print_pin_state();
+	void print_device_location();
 	virtual void set_state(int power) = 0;
 };
+
+class Sensor: public IO {
+	//base class extends IO to make it output a value
+public:
+	Sensor(int pin);
+	virtual int read_state() = 0;
+	virtual bool state_changed() = 0;
+};
+
 
 
 class LED: public IO {//subclass IO
@@ -28,11 +37,7 @@ public:
 	void set_state(int power);
 };
 
-class Button: public IO {//subclass IO
-public:
-	Button(int pin_number);
-	void set_state(int power);
-};
+
 
 class DCMotor: public IO {
 private:
