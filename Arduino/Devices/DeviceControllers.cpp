@@ -39,10 +39,14 @@ DCMotor::DCMotor(int motor_port, int dir) : IO(motor_port){
 }
 
 <<<<<<< master
+<<<<<<< master
 void DCMotor::set_state(int power){
 =======
 void DCMotor::set_power(int power){
 >>>>>>> Fix motor definition
+=======
+void DCMotor::set_state(int power){
+>>>>>>> Refactor name of function
 	motor->setSpeed(power);
 	motor->run(direction);
 }
