@@ -1,10 +1,10 @@
 import numpy as np
 
 class Robot():
-    def __init__(self, camera, coms):
+    def __init__(self, camera):
         """Sets up a Robot object"""
         self.camera = camera
-        self.coms = coms
+        #self.coms = coms
         self.position = False
         self.orientation = False
         self.target = False  #Can assign block object
@@ -39,21 +39,30 @@ class Robot():
         print("Position updated")
 
         orientation_rad = np.deg2rad(self.orientation)
-        robot_vector = np.array([np.sin(orientation_rad),np.cos(orientation_rad)])
-        robot_block_vector = self.position - self.target.position
+        vertical_vector = np.array([0,-1])
+        robot_block_vector = self.target.position - self.position  #vector from robot to block
 
         self.distance = np.linalg.norm(robot_block_vector)
         print("Distance is:", self.distance)
 
-        sin_angle = np.cross(robot_block_vector, robot_vector) / (np.linalg.norm(robot_vector) * np.linalg.norm(robot_block_vector))
-        cos_angle = np.dot(robot_block_vector, robot_vector) / (np.linalg.norm(robot_vector) * np.linalg.norm(robot_block_vector))
+        sin_angle = np.cross(vertical_vector, robot_block_vector) / (1 * self.distance)
+        cos_angle = np.dot(robot_block_vector, vertical_vector) / (1 * self.distance)
         angle_sin = np.arcsin(sin_angle)
         angle_cos = np.arccos(cos_angle)
+        print("angle_sin",np.degrees(angle_sin))
+        print("angle_cos",np.degrees(angle_cos))
 
-        if angle_cos > 90:
-            self.angle = np.degrees(np.sign(angle_sin)*(-1)*angle_cos)
+        if np.sign(angle_sin) == 1:
+            block_angle = angle_cos
         else:
-            self.angle = np.degrees(-1*angle_sin)
+            block_angle = -1*angle_cos
+
+        self.angle = np.degrees(block_angle - orientation_rad)
+        if self.angle > 180:
+            self.angle = -1*(self.angle-180)
+        elif self.angle < -180:
+            self.angle = -1*(self.angle+180)
+
         print("Angle is:", self.angle)
 
         return self.distance, self.angle  #use self.target

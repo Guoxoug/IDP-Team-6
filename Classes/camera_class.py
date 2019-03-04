@@ -11,7 +11,7 @@ class Camera():
     x, y = np.meshgrid(np.arange(0, X), np.arange(0, Y))
     condition = (x < 10) | (x > X - 20) | ((x > 586) & (y > 160) & (y < 274)) | ((x > 313) & (x < 322)) | ((x > 430) & (y < 50))  # | (y < 10) | (y > Y-10)
 
-    robot_query = cv2.imread('robot_query_2.png', 0)
+    robot_query = cv2.imread('robot_query_3.png', 0)
 
     # Initiate SIFT detector
     sift = cv2.xfeatures2d.SIFT_create()
@@ -26,7 +26,7 @@ class Camera():
     def __init__(self):
         """Sets up a camera object and gives some pre-determined functions"""
         self.open = True
-        self.cap = cv2.VideoCapture(2)
+        self.cap = cv2.VideoCapture(0)
 
 
     def take_shot(self):
