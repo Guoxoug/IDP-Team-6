@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from .block_class import Block
 from .processing_functions import decompose_matrix
+from .camera_async_class import VideoCaptureAsync
 
 
 class Camera():
@@ -9,9 +10,9 @@ class Camera():
     X = 640;
     Y = 480  # Dimensions of camera feed
     x, y = np.meshgrid(np.arange(0, X), np.arange(0, Y))
-    condition = (x < 10) | (x > X - 20) | ((x > 586) & (y > 160) & (y < 274)) | ((x > 313) & (x < 322)) | ((x > 430) & (y < 50))  # | (y < 10) | (y > Y-10)
+    condition = (x < 10) | (x > X - 20) | ((x > 586) & (y > 160) & (y < 274)) | ((x > 430) & (y < 50))  # | (y < 10) | (y > Y-10)      and | ((x > 313) & (x < 322)) for vertical line
 
-    robot_query = cv2.imread('robot_query_3.png', 0)
+    robot_query = cv2.imread('robot_query_4.png', 0)
 
     # Initiate SIFT detector
     sift = cv2.xfeatures2d.SIFT_create()
@@ -26,15 +27,18 @@ class Camera():
     def __init__(self):
         """Sets up a camera object and gives some pre-determined functions"""
         self.open = True
-        self.cap = cv2.VideoCapture(0)
+        #self.cap = cv2.VideoCapture(1)
+        self.cap = VideoCaptureAsync(1)
+        self.cap.start()
+
+        frame = self.cap.read()
 
 
     def take_shot(self):
         """Takes a single shot and returns the hsv image"""
-        print("Taking shot")
+        #print("Taking shot")
 
-        _, frame = self.cap.read()
-        _, frame = self.cap.read()
+        frame = self.cap.read()
 
         #cv2.imshow("Image with locations", frame)
         #cv2.waitKey(5)
@@ -118,7 +122,7 @@ class Camera():
 
         print("Good matches", len(good))
 
-        MIN_MATCH_COUNT = 17
+        MIN_MATCH_COUNT = 25
 
         if len(good) > MIN_MATCH_COUNT:
             src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
@@ -136,21 +140,22 @@ class Camera():
 
             position = self.calculate_moment(dst)
 
-            print("Position robot:", position)
-            print("Orientation robot:", orientation)
-
             gray = cv2.polylines(gray, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
             cv2.circle(gray, position, 10, (255, 0, 255), -1)
 
         else:
             print("Not enough matches are found - {} {}".format(len(good), MIN_MATCH_COUNT))
             matchesMask = None
-            self.get_position_orientation_robot()
+            position, orientation = self.get_position_orientation_robot()
+            return position, orientation
 
         draw_params = dict(matchColor=(0, 255, 0),  # draw matches in green color
-                           singlePointColor=None,
-                           matchesMask=matchesMask,  # draw only inliers
+                           singlePointColor = None,
+                           matchesMask = matchesMask,  # draw only inliers
                            flags=2)
+
+        print("Position robot:", position)
+        print("Orientation robot:", orientation)
 
         img3 = cv2.drawMatches(self.robot_query, kp1, gray, kp2, good, None, **draw_params)
 
@@ -185,7 +190,7 @@ class Camera():
 
             # show the image
             cv2.imshow("Image with locations", frame)
-            #cv2.imwrite("frame_drawn_on.png", frame)
+            # cv2.imwrite("frame_drawn_on.png", frame)
             cv2.waitKey(5)
 
             print("Blocks made")
@@ -206,7 +211,8 @@ class Camera():
                 #distance matrix?? each element to the other one
 
     def close(self):
-        self.cap.release()
+        #self.cap.release()
+        self.cap.stop()
         cv2.destroyAllWindows()
         self.open = False
 

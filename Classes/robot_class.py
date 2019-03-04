@@ -1,4 +1,5 @@
 import numpy as np
+from simple_pid import PID
 
 class Robot():
     def __init__(self, camera):
@@ -49,8 +50,6 @@ class Robot():
         cos_angle = np.dot(robot_block_vector, vertical_vector) / (1 * self.distance)
         angle_sin = np.arcsin(sin_angle)
         angle_cos = np.arccos(cos_angle)
-        print("angle_sin",np.degrees(angle_sin))
-        print("angle_cos",np.degrees(angle_cos))
 
         if np.sign(angle_sin) == 1:
             block_angle = angle_cos
@@ -76,13 +75,27 @@ class Robot():
         pass
 
     def turn(self):
-        margin = 20
-        while np.abs(self.angle) > margin:
-            self.coms.turn(15*np.sign(self.angle))  #later the percentage can be decided by a controller
-            self.update_position()
-            self.distance, self.angle = self.get_distance_angle_target()
-        self.coms.turn(0)
+        margin = 10
+        pid = PID(1, 0.01, 0.05, setpoint = 0)
+        u, v = self.get_distance_angle_target()
+        pid.output_limits = (-5, 5)
+        control = pid(v)
 
+        while(control != 0):
+            print("Control output:", control)
+            print("Components", pid.components)  # the separate terms are now in p, i, d)
+            self.coms.turn(control)
+
+            u, v = self.get_distance_angle_target()
+
+            control = pid(v)
+        """
+
+        while np.abs(self.angle) > margin:
+            self.coms.turn(10*np.sign(self.angle))  #later the percentage can be decided by a controller
+            self.distance, self.angle = self.get_distance_angle_target()  #Has to update the robot pos_ori inside anyway
+        self.coms.turn(0)
+        """
     def __repr__(self):
         return "Robot\n position: {}\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}".format(self.position) #, self.target, self.orientation, self.distance, self.num_tested, self.num_picked_up)
         #\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}"
