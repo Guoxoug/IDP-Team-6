@@ -31,29 +31,43 @@ class Coms():
         #  takes power and motor name (right, left)  as parameters
         #  power is between -100 and 100
         #  power to arduino func takes 0 - 7
+        command = bytearray([])
         if motor_name == "right":
             if power >= 0:
-                input_power = str(round(power / 100 * 7))
-                command = "a" + input_power + "\n"   # newline indicates end of command to arduino
-                self.serial.write(bytes(command, "utf-8"))
-                print("command", bytes(command, "utf-8"))# single character
+                input_power = round(power / 100 * 255)
+                command += b"a"
+                command += bytes([input_power])
+                command += b"\n"
+                # newline indicates end of command to arduino
+                print(command)
+                self.serial.write(command)
+
+
             elif power < 0:
-                input_power = str(round(-power/100*7))
-                command = "b" + input_power + "\n"
-                self.serial.write(bytes(command, "utf-8"))
-                print("command", bytes(command, "utf-8"))# two character string
+                input_power = -round(power / 100 * 255)
+                command += b"b"
+                command += bytes([input_power])
+                command += b"\n"
+                # newline indicates end of command to arduino
+                self.serial.write(command)
+                #print("command", bytes(command, "utf-8"))# single character
         if motor_name == "left":
             if power >= 0:
-                input_power = str(round(power / 100 * 7))
-                command = "c" + input_power + "\n"# newline indicates end of command to arduino
-                self.serial.write(bytes(command, "utf-8"))
-                print("command", bytes(command, "utf-8"))# single character
+                input_power = round(power / 100 * 255)
+                command += b"c"
+                command += bytes([input_power])
+                command += b"\n"
+                # newline indicates end of command to arduino
+                self.serial.write(command)
+                #print("command", bytes(command, "utf-8"))# single character
             elif power < 0:
-                input_power = str(round(-power/100*7))
-                command = "d" + input_power + "\n"
-                self.serial.write(bytes(command, "utf-8"))
-                print("command", bytes(command, "utf-8"))# two character string
-
+                input_power = -round(power / 100 * 255)
+                command += b"d"
+                command += bytes([input_power])
+                command += b"\n"
+                # newline indicates end of command to arduino
+                self.serial.write(command)
+                #print("command", bytes(command, "utf-8"))# single character
     # Movement methods
     # Self explanatory ^^
     # power always int 0-100
