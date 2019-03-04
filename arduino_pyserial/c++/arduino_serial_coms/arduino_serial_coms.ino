@@ -43,31 +43,31 @@ void loop() {
     case 'a' : 
       //guys_motor_function(int(input_command[1]));
       //digitalWrite(LED_BUILTIN, HIGH);
-      right_motor_forward(int(input_command[1]));
+      right_motor_forward(int(input_command[1])); 
       /* IMPORTANT Char type in c++ is just an integer, so to get the integer value do char - '0'
        *  Also be careful with integer calculations, remember that division is floored
        */
-      Serial.print(int(input_command[1]));
+      Serial.print(int(input_command[1])); 
 
       break;
     case 'b' :
-      //digitalWrite(LED_BUILTIN, LOW);
+      //digitalWrite(LED_BUILTIN, LOW); 
       //guys_other_motor_function(int(input_command[1]));
-
-      right_motor_backward(int(input_command[1]));
+     
+      right_motor_backward(int(input_command[1])); 
       break;
-    case 'c' :
+    case 'c' : 
       //guys_motor_function(int(input_command[1]));
       //digitalWrite(LED_BUILTIN, HIGH);
-       left_motor_forward(int(input_command[1]));
-       Serial.print(int(input_command[1]));
-
+       left_motor_forward(int(input_command[1])); 
+       Serial.print(int(input_command[1])); 
+      
       break;
     case 'd' :
-    //digitalWrite(LED_BUILTIN, LOW);
+    //digitalWrite(LED_BUILTIN, LOW); 
   //guys_other_motor_function(int(input_command[1]));
-
-     left_motor_backward(int(input_command[1]));
+   
+     left_motor_backward(int(input_command[1])); 
     break;
     
     default :;

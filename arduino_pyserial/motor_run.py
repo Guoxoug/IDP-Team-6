@@ -6,7 +6,7 @@ import time
 IMPORTS MAY BREAK depending on whether the code is run in an IDE or from the console
 """
 name = initialise_connection.locate_port().device  # finds port connected to board (Arduino resets on connection)
-arduino_port = serial.Serial(name, 9600, timeout=5)  # 5 second timout for read method
+arduino_port = serial.Serial(name, 9600, timeout=1)  # 1 second timout for read method
 initialise_connection.handshake(arduino_port)
 
 arduino_coms = coms_class.Coms(arduino_port)
