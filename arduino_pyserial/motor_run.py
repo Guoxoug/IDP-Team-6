@@ -11,14 +11,14 @@ initialise_connection.handshake(arduino_port)
 
 arduino_coms = coms_class.Coms(arduino_port)
 
-arduino_coms.forward(100)
+arduino_coms.forward(78)
 time.sleep(2)
-arduino_coms.backward(100)
+arduino_coms.backward(78)
 time.sleep(2)
 for i in range(6):
-    arduino_coms.turn(100, "clockwise")
+    arduino_coms.turn(78, "clockwise")
     time.sleep(0.3)
-    arduino_coms.turn(100, "anticlockwise")
+    arduino_coms.turn(78, "anticlockwise")
     time.sleep(0.3)
 arduino_coms.stop()
 

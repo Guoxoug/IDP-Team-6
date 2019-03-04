@@ -1,2 +1,2 @@
 spec.o: \
- C:/Users/guy/Documents/Macros/Sloeber/.metadata/.plugins/org.eclipse.cdt.managedbuilder.core/spec.C
+ E:/guoxu/OneDrive/Documents/Documents/School\ \ work/IB\ Coursework/IDP/.metadata/.plugins/org.eclipse.cdt.managedbuilder.core/spec.C

@@ -39,7 +39,7 @@ class Coms():
                 command += bytes([input_power])
                 command += b"\n"
                 # newline indicates end of command to arduino
-                print(command)
+
                 self.serial.write(command)
 
 
