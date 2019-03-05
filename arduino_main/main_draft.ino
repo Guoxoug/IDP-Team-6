@@ -4,12 +4,13 @@
 #include "Arduino.h"
 #include "DeviceControllers.h"
 #include "Adafruit_MotorShield.h"
+#include <Servo.h>
 LED* led;
 DCMotor* right_fwd;
 DCMotor* right_bwd;
 DCMotor* left_fwd;
 DCMotor* left_bwd;
-
+IDP_servo* selector_servo;
 
 void establishContact();
 String input_command = "";         // a String to hold incoming data
@@ -18,13 +19,13 @@ bool string_complete = false;  // whether the string is complete
 void setup() {
 	AFMS.begin();   // create with the default frequency 1.6KHz
 
-
-  led = new LED(LED_BUILTIN); //these declarations must come after Serial
-  //led->print_pin_state();
+	// I/O object definitions
+  led = new LED(LED_BUILTIN);
   right_fwd = new DCMotor(1,FORWARD);
   right_bwd = new DCMotor(1,BACKWARD);
   left_fwd = new DCMotor(2, FORWARD);
   left_bwd = new DCMotor(2, BACKWARD);
+  selector_servo = new IDP_servo(9); // pin 9
   //right_fwd->print_pin_state();
   // start serial port at 9600 bps:
   Serial.begin(9600);
@@ -45,14 +46,18 @@ void loop() {
     		right_fwd->set_state(int(input_command[1])); //  reverts Char input back into int
 			break;
     	case 'b':
-    	    		right_bwd->set_state(int(input_command[1]));
+			right_bwd->set_state(int(input_command[1]));
 			break;
     	case 'c':
-    	    		left_fwd->set_state(int(input_command[1]));
+			left_fwd->set_state(int(input_command[1]));
 			break;
     	case 'd':
-    	    		left_bwd->set_state(int(input_command[1]));
+			left_bwd->set_state(int(input_command[1]));
     	    break;
+    	case 'e':
+			selector_servo->set_state(int(input_command[1])); //position arg
+
+			break;
     	default :;
     	}
     // clear the string:

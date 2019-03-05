@@ -46,7 +46,7 @@ class IDP_servo: public IO {
 
 public:
 	IDP_servo(int pin_number);
-	void set_state(int postion);
+	void set_state(int position);
 	Servo our_servo;
 
 };

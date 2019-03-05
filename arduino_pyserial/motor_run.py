@@ -22,6 +22,6 @@ for i in range(6):
     time.sleep(0.3)
 arduino_coms.stop()
 
-
+arduino_coms.servo(0)
 arduino_port.close()
 print("port closed")
