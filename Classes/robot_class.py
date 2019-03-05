@@ -20,24 +20,24 @@ class Robot():
 
         for i in range(0,3):
             next_position, next_orientation = self.camera.get_position_orientation_robot()
-            self.pos_array[i] = next_position
-            self.ori_array[i] = next_orientation
-        print("Length pos_array:", len(pos_array))
-        print("Length ori_array:", len(ori_array))
+            self.pos_array.append(next_position)
+            self.ori_array.append(next_orientation)
+        print("Length pos_array:", len(self.pos_array))
+        print("Length ori_array:", len(self.ori_array))
         self.update_position()
 
     def update_position(self):
         """Updates the position of the robot using the self.front and self.back circles"""
         #some function camera.update_robot()
-        pos_array.pop(0)
-        ori_array.pop(0)
+        self.pos_array.pop(0)
+        self.ori_array.pop(0)
         next_position, next_orientation = self.camera.get_position_orientation_robot()
-        pos_array.append(next_position)
-        ori_array.append(next_orientation)
-        self.orientation = np.mean(ori_array)
-        self.position = np.mean(pos_array, axis = 0)
-        print("Updated position:", self.position)
-        print("Updated orientation:", self.orientation)
+        self.pos_array.append(next_position)
+        self.ori_array.append(next_orientation)
+        self.orientation = np.median(self.ori_array)
+        self.position = np.median(self.pos_array, axis = 0)
+        #print("Updated position:", self.position)
+        #print("Updated orientation:", self.orientation)
 
     def find_next_target(self):
         """Use the camera to find the next destination as position coordinates"""
@@ -83,50 +83,85 @@ class Robot():
 
         return self.distance, self.angle  #use self.target
 
-    def move_forward(self, num):
+    def move_forward(self, p, i, d, num):
         """Moves the robot forward"""
-        margin = 100
+        margin_ori = 20
+        set_point = 50
+        pid = PID(p, i, d, setpoint = set_point)
+        self.distance, self.angle = self.get_distance_angle_target()
+        pid.output_limits = (-50, 50)
+        control = pid(self.distance)
+        i = 0
+
+        while(control != 0 and i < num and abs(self.distance-set_point) > 10):
+            if np.abs(self.angle) >= margin_ori:
+                print("Stopping")
+                self.coms.stop()
+                self.turn()
+            print("Control dist output:", control*-1)
+            print("Components dist", pid.components)  # the separate terms are now in p, i, d)
+            self.coms.forward(int(control*-1))
+
+            self.distance, self.angle = self.get_distance_angle_target()
+
+            control = pid(self.distance)
+            i += 1
+
+
+        print("Arrived at destination")
+
+        self.coms.stop()
+        """
         for i in range(num):
             self.coms.forward(50)
         self.coms.stop()
 
-        """
+        self.distance, self.angle = self.get_distance_angle_target()
         while np.abs(self.distance) > margin:
-            self.coms.forward(int(10)  #later the percentage can be decided by a controller
+            if np.abs(self.orientation) >= margin_ori:
+                self.coms.stop()
+                self.turn()
+            self.coms.forward(int(30*np.sign(self.distance))) #later the percentage can be decided by a controller
             self.distance, self.angle = self.get_distance_angle_target()  #Has to update the robot pos_ori inside anyway
         self.coms.stop()
         """
+
     def move_backward(self):
         """Moves the robot backward"""
         pass
 
-    def turn(self, num):
+    def turn(self, p = 0.5, i = 0.1, d = 0.1, num = 40):
         margin = 10
-        """
-        pid = PID(1, 0.01, 0.05, setpoint = 0)
-        u, v = self.get_distance_angle_target()
-        pid.output_limits = (-5, 5)
-        control = pid(v)
+        pid = PID(p, i, d, setpoint = 0)
+        self.distance, self.angle = self.get_distance_angle_target()
+        pid.output_limits = (-50, 50)
+        control = pid(self.angle)
+        i = 0
 
-        while(control != 0):
-            print("Control output:", control)
+        while(control != 0 and i < num and abs(self.angle) > 10):
+            print("Control output:", control*-1)
             print("Components", pid.components)  # the separate terms are now in p, i, d)
-            self.coms.turn(control)
+            self.coms.turn(int(control*-1))
 
-            u, v = self.get_distance_angle_target()
+            self.distance, self.angle = self.get_distance_angle_target()
 
-            control = pid(v)
-        
+            control = pid(self.angle)
+            i += 1
 
-        while np.abs(self.angle) > margin:
-            self.coms.turn(int(10*np.sign(self.angle)))  #later the percentage can be decided by a controller
-            self.distance, self.angle = self.get_distance_angle_target()  #Has to update the robot pos_ori inside anyway
         self.coms.stop()
         """
         for i in range(0,num):
             #print(i)
-            self.coms.turn(20)
+            self.coms.turn(-20)
         self.coms.stop()
+        
+        
+        self.distance, self.angle = self.get_distance_angle_target()
+        while np.abs(self.angle) > margin:
+            self.coms.turn(int(30*np.sign(self.angle)))  #later the percentage can be decided by a controller
+            self.distance, self.angle = self.get_distance_angle_target()  #Has to update the robot pos_ori inside anyway
+        self.coms.stop()
+        """
 
     def __repr__(self):
         return "Robot\n position: {}\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}".format(self.position) #, self.target, self.orientation, self.distance, self.num_tested, self.num_picked_up)

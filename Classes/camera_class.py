@@ -12,7 +12,7 @@ class Camera():
     x, y = np.meshgrid(np.arange(0, X), np.arange(0, Y))
     condition = (x < 10) | (x > X - 20) | ((x > 586) & (y > 160) & (y < 274)) | ((x > 430) & (y < 50))  # | (y < 10) | (y > Y-10)      and | ((x > 313) & (x < 322)) for vertical line
 
-    robot_query = cv2.imread('robot_query_5.png', 0)
+    robot_query = cv2.imread('robot_query_7.png', 0)
 
     # Initiate SIFT detector
     sift = cv2.xfeatures2d.SIFT_create()
@@ -28,7 +28,7 @@ class Camera():
         """Sets up a camera object and gives some pre-determined functions"""
         self.open = True
         #self.cap = cv2.VideoCapture(1)
-        self.cap = VideoCaptureAsync(2)
+        self.cap = VideoCaptureAsync(0)
         self.cap.start()
 
         frame = self.cap.read()
@@ -42,7 +42,8 @@ class Camera():
 
         #cv2.imshow("Image with locations", frame)
         #cv2.waitKey(5)
-
+        if frame is None:
+            print("ARGH")
         # Convert BGR to HSV
         frame[self.condition] = 0
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -154,10 +155,9 @@ class Camera():
                            matchesMask = matchesMask,  # draw only inliers
                            flags=2)
 
-        print("Position robot:", position)
-        print("Orientation robot:", orientation)
-
         img3 = cv2.drawMatches(self.robot_query, kp1, gray, kp2, good, None, **draw_params)
+        cv2.circle(img3, (314+self.robot_query.shape[1], 32), 5, (255, 0, 0), -1)
+
 
         cv2.imshow("Image with matches", img3)
         cv2.waitKey(5)
@@ -188,12 +188,11 @@ class Camera():
             cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
             cv2.circle(frame, centroid, 3, (255, 0, 255), -1)
 
-            # show the image
-            cv2.imshow("Image with locations", frame)
-            # cv2.imwrite("frame_drawn_on.png", frame)
-            cv2.waitKey(5)
-
-            print("Blocks made")
+        # show the image
+        cv2.imshow("Image with locations", frame)
+        #cv2.imwrite("frame_drawn_on.png", frame)
+        cv2.waitKey(5)
+        print("Blocks made")
 
         return blocks
 
