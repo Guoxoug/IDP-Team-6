@@ -12,7 +12,7 @@ class Camera():
     x, y = np.meshgrid(np.arange(0, X), np.arange(0, Y))
     condition = (x < 10) | (x > X - 20) | ((x > 586) & (y > 160) & (y < 274)) | ((x > 430) & (y < 50))  # | (y < 10) | (y > Y-10)      and | ((x > 313) & (x < 322)) for vertical line
 
-    robot_query = cv2.imread('robot_query_4.png', 0)
+    robot_query = cv2.imread('robot_query_5.png', 0)
 
     # Initiate SIFT detector
     sift = cv2.xfeatures2d.SIFT_create()
@@ -28,7 +28,7 @@ class Camera():
         """Sets up a camera object and gives some pre-determined functions"""
         self.open = True
         #self.cap = cv2.VideoCapture(1)
-        self.cap = VideoCaptureAsync(1)
+        self.cap = VideoCaptureAsync(2)
         self.cap.start()
 
         frame = self.cap.read()
@@ -102,9 +102,9 @@ class Camera():
 
         if des2 is None:
             print("Connection lost, no descriptors found")
-            print("Retrying")
-            while (des2 == None):
-                _, frame = self.cap.read()
+            while (des2 is None):
+                print("Retrying")
+                frame = self.cap.read()
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -122,7 +122,7 @@ class Camera():
 
         print("Good matches", len(good))
 
-        MIN_MATCH_COUNT = 25
+        MIN_MATCH_COUNT = 10
 
         if len(good) > MIN_MATCH_COUNT:
             src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
@@ -141,7 +141,7 @@ class Camera():
             position = self.calculate_moment(dst)
 
             gray = cv2.polylines(gray, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
-            cv2.circle(gray, position, 10, (255, 0, 255), -1)
+            #cv2.circle(gray, position, 10, (255, 0, 255), -1)
 
         else:
             print("Not enough matches are found - {} {}".format(len(good), MIN_MATCH_COUNT))

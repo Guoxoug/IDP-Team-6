@@ -69,12 +69,12 @@ class Coms():
     # Self explanatory ^^
     # power always int 0-100
     def forward(self, power):
-        self.motor(power, "right")
-        self.motor(power, "left")
-
-    def backward(self, power):
         self.motor(-power, "right")
         self.motor(-power, "left")
+
+    def backward(self, power):
+        self.motor(power, "right")
+        self.motor(power, "left")
 
     def turn(self, power):
         if np.sign(power) == 1:

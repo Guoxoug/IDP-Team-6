@@ -2,10 +2,10 @@ import numpy as np
 from simple_pid import PID
 
 class Robot():
-    def __init__(self, camera):
+    def __init__(self, camera, coms):
         """Sets up a Robot object"""
         self.camera = camera
-        #self.coms = coms
+        self.coms = coms
         self.position = False
         self.orientation = False
         self.target = False  #Can assign block object
@@ -15,11 +15,29 @@ class Robot():
         self.angle = 0
         self.num_tested = 0
         self.num_picked_up = 0
+        self.pos_array = []
+        self.ori_array = []
+
+        for i in range(0,3):
+            next_position, next_orientation = self.camera.get_position_orientation_robot()
+            self.pos_array[i] = next_position
+            self.ori_array[i] = next_orientation
+        print("Length pos_array:", len(pos_array))
+        print("Length ori_array:", len(ori_array))
+        self.update_position()
 
     def update_position(self):
         """Updates the position of the robot using the self.front and self.back circles"""
         #some function camera.update_robot()
-        self.position, self.orientation = self.camera.get_position_orientation_robot()
+        pos_array.pop(0)
+        ori_array.pop(0)
+        next_position, next_orientation = self.camera.get_position_orientation_robot()
+        pos_array.append(next_position)
+        ori_array.append(next_orientation)
+        self.orientation = np.mean(ori_array)
+        self.position = np.mean(pos_array, axis = 0)
+        print("Updated position:", self.position)
+        print("Updated orientation:", self.orientation)
 
     def find_next_target(self):
         """Use the camera to find the next destination as position coordinates"""
@@ -36,8 +54,7 @@ class Robot():
         clockwise is positive rotation
         """
         #always call update_position before this
-        self.position, self.orientation = self.camera.get_position_orientation_robot()
-        print("Position updated")
+        self.update_position()
 
         orientation_rad = np.deg2rad(self.orientation)
         vertical_vector = np.array([0,-1])
@@ -66,16 +83,26 @@ class Robot():
 
         return self.distance, self.angle  #use self.target
 
-    def move_forward(self):
+    def move_forward(self, num):
         """Moves the robot forward"""
-        pass
+        margin = 100
+        for i in range(num):
+            self.coms.forward(50)
+        self.coms.stop()
 
+        """
+        while np.abs(self.distance) > margin:
+            self.coms.forward(int(10)  #later the percentage can be decided by a controller
+            self.distance, self.angle = self.get_distance_angle_target()  #Has to update the robot pos_ori inside anyway
+        self.coms.stop()
+        """
     def move_backward(self):
         """Moves the robot backward"""
         pass
 
-    def turn(self):
+    def turn(self, num):
         margin = 10
+        """
         pid = PID(1, 0.01, 0.05, setpoint = 0)
         u, v = self.get_distance_angle_target()
         pid.output_limits = (-5, 5)
@@ -89,13 +116,18 @@ class Robot():
             u, v = self.get_distance_angle_target()
 
             control = pid(v)
-        """
+        
 
         while np.abs(self.angle) > margin:
-            self.coms.turn(10*np.sign(self.angle))  #later the percentage can be decided by a controller
+            self.coms.turn(int(10*np.sign(self.angle)))  #later the percentage can be decided by a controller
             self.distance, self.angle = self.get_distance_angle_target()  #Has to update the robot pos_ori inside anyway
-        self.coms.turn(0)
+        self.coms.stop()
         """
+        for i in range(0,num):
+            #print(i)
+            self.coms.turn(20)
+        self.coms.stop()
+
     def __repr__(self):
         return "Robot\n position: {}\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}".format(self.position) #, self.target, self.orientation, self.distance, self.num_tested, self.num_picked_up)
         #\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}"
