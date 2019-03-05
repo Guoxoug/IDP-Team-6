@@ -55,7 +55,6 @@ public:
 	//inherit set_state
 };
 
-
 class LED: public IO {//subclass IO
 class LED: public IO {//subclass IO
 public:
@@ -63,6 +62,7 @@ public:
 	void set_state(int power);
 };
 
+<<<<<<< master
 class Button: public IO {//subclass IO
 public:
 	Button(int pin_number);
@@ -101,6 +101,8 @@ public:
 
 >>>>>>> Sensor base class
 
+=======
+>>>>>>> Clean up whitespace
 class DCMotor: public IO {
 private:
 	int direction;
