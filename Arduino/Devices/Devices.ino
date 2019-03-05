@@ -6,8 +6,6 @@ LED* led;
 DCMotor* right_fwd;
 Button* push_button;
 
-
-
 void setup() {
   Serial.begin(9600);           //Start serial and set the correct Baud Rate
   AFMS.begin();

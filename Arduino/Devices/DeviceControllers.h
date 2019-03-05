@@ -40,14 +40,11 @@ public:
 	//inherit set_state
 };
 
-
 class LED: public IO {//subclass IO
 public:
 	LED(int pin_number);
 	void set_state(int power);
 };
-
-
 
 class DCMotor: public IO {
 private:
