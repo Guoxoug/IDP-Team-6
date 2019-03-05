@@ -35,6 +35,9 @@ bool Sensor::state_changed(){ //default state changed check is pretty literal
 	return state_changed;
 }
 
+Button::Button(int pin_number) : Sensor(pin_number){}
+
+
 int Button::read_state(){
 	return digitalRead(pin);
 }
