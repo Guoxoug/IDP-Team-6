@@ -24,7 +24,7 @@ void IO::print_device_location(){
 }
 
 Sensor::Sensor(int pin_number) : IO(pin_number){
-	pinMode(pin, INPUT);
+	pinMode(pin, INPUT);//works if we switch to OUTPUT
 }
 
 bool Sensor::state_changed(){ //default state changed check is pretty literal
