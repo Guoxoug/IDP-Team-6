@@ -9,12 +9,6 @@
 #define DEVICECONTROLLERS_H_
 
 #include "Adafruit_MotorShield.h"
-<<<<<<< master
-#include "Adafruit_MotorShield.h"
-
-extern Adafruit_MotorShield AFMS;
-=======
->>>>>>> Extract device controlling into separate files
 
 extern Adafruit_MotorShield AFMS;
 
@@ -23,16 +17,7 @@ class IO {
 public:
 	IO(int pin_number);
 	int pin;
-<<<<<<< master
-	void print_pin_state();
-<<<<<<< master
-	virtual void set_power(int power) = 0;
-<<<<<<< master
-=======
->>>>>>> Refactor name of function
-=======
 	void print_device_location();
->>>>>>> Sensor base class
 	virtual void set_state(int power) = 0;
 };
 
@@ -56,53 +41,11 @@ public:
 };
 
 class LED: public IO {//subclass IO
-class LED: public IO {//subclass IO
 public:
 	LED(int pin_number);
 	void set_state(int power);
 };
 
-<<<<<<< master
-class Button: public IO {//subclass IO
-public:
-	Button(int pin_number);
-	void set_state(int power);
-};
-
-class DCMotor: public IO {
-private:
-	int direction;
-public:
-	DCMotor(int motor_port, int direction);
-	void set_state(int power);
-	Adafruit_DCMotor *motor;
-=======
-	virtual void set_power(int val) = 0;
-};
-
-
-class LED: public IO { //Subclass IO
-public:
-	LED(int pin_number);
-	void set_state(int power);
-};
-
-<<<<<<< master
-class Button: public IO {//subclass IO
-public:
-	Button(int pin_number);
-	void set_state(int power);
-};
-	LED(int pin_number); //default on
-	void set_power(int val);
->>>>>>> Extract device controlling into separate files
-};
-=======
-
->>>>>>> Sensor base class
-
-=======
->>>>>>> Clean up whitespace
 class DCMotor: public IO {
 private:
 	int direction;
