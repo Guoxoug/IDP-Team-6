@@ -83,7 +83,7 @@ class Robot():
 
         return self.distance, self.angle  #use self.target
 
-    def move_forward(self, p, i, d, num):
+    def move_forward(self, p=0.5, i=0.1, d=0.1, num=1000):
         """Moves the robot forward"""
         margin_ori = 20
         set_point = 50

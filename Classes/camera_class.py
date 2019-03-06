@@ -56,7 +56,7 @@ class Camera():
         """Returns the blurred mask"""
 
         # Colour required to identify features in format (H in degrees, S decimal, V decimal)
-        blue = (210, 0.52, 0.87)
+        blue = (196, 0.43, 0.91)   #210, 0.52, 0.87
         red = (1, 0.44, 0.93)
         green = (165, 0.79, 0.64)
         purple = (345, 0.26, 0.49)  # Change! RGB 234, 12, 208
@@ -64,7 +64,7 @@ class Camera():
         dark_green = (178, 0.21, 0.60)
 
         # Create dictionary of "colour": (lower_colour, upper_colour) where each are tuple len=3
-        colour_dict = {"dark_green": (((dark_green[0] - 10) * 0.5, 255 * max(dark_green[1] - 0.1, 0), 255 * max(dark_green[2] - 0.1, 0)), ((dark_green[0] + 10) * 0.5, 255 * min(dark_green[1] + 0.1, 1), 255 * min(dark_green[2] + 0.1, 1))), "orange": (((orange[0] - 10) * 0.5, 255 * max(orange[1] - 0.2, 0), 255 * max(orange[2] - 0.2, 0)), ((orange[0] + 10) * 0.5, 255 * min(orange[1] + 0.2, 1), 255 * min(orange[2] + 0.2, 1))), "purple": (((purple[0] - 10) * 0.5, 255 * max(purple[1] - 0.1, 0), 255 * max(purple[2] - 0.1, 0)), ((purple[0] + 10) * 0.5, 255 * min(purple[1] + 0.1, 1), 255 * min(purple[2] + 0.1, 1))), "blue": (((blue[0] - 15) * 0.5, 255 * max(blue[1] - 0.3, 0), 255 * max(blue[2] - 0.2, 0)), ((blue[0] + 15) * 0.5, 255 * min(blue[1] + 0.3, 1), 255 * min(blue[2] + 0.2, 1))), "green": (((green[0] - 10) * 0.5, 255 * max(green[1] - 0.2, 0), 255 * max(green[2] - 0.2, 0)), ((green[0] + 10) * 0.5, 255 * min(green[1] + 0.2, 1), 255 * min(green[2] + 0.2, 1))), "red": (((red[0] - 10) * 0.5, 255 * max(red[1] - 0.2, 0), 255 * max(red[2] - 0.2, 0)), ((red[0] + 10) * 0.5, 255 * min(red[1] + 0.2, 1), 255 * min(red[2] + 0.2, 1)))}
+        colour_dict = {"dark_green": (((dark_green[0] - 10) * 0.5, 255 * max(dark_green[1] - 0.1, 0), 255 * max(dark_green[2] - 0.1, 0)), ((dark_green[0] + 10) * 0.5, 255 * min(dark_green[1] + 0.1, 1), 255 * min(dark_green[2] + 0.1, 1))), "orange": (((orange[0] - 10) * 0.5, 255 * max(orange[1] - 0.2, 0), 255 * max(orange[2] - 0.2, 0)), ((orange[0] + 10) * 0.5, 255 * min(orange[1] + 0.2, 1), 255 * min(orange[2] + 0.2, 1))), "purple": (((purple[0] - 10) * 0.5, 255 * max(purple[1] - 0.1, 0), 255 * max(purple[2] - 0.1, 0)), ((purple[0] + 10) * 0.5, 255 * min(purple[1] + 0.1, 1), 255 * min(purple[2] + 0.1, 1))), "blue": (((blue[0] - 5) * 0.5, 255 * max(blue[1] - 0.2, 0), 255 * max(blue[2] - 0.2, 0)), ((blue[0] + 5) * 0.5, 255 * min(blue[1] + 0.2, 1), 255 * min(blue[2] + 0.2, 1))), "green": (((green[0] - 10) * 0.5, 255 * max(green[1] - 0.2, 0), 255 * max(green[2] - 0.2, 0)), ((green[0] + 10) * 0.5, 255 * min(green[1] + 0.2, 1), 255 * min(green[2] + 0.2, 1))), "red": (((red[0] - 10) * 0.5, 255 * max(red[1] - 0.2, 0), 255 * max(red[2] - 0.2, 0)), ((red[0] + 10) * 0.5, 255 * min(red[1] + 0.2, 1), 255 * min(red[2] + 0.2, 1)))}
 
         mask = cv2.inRange(hsv, np.array(colour_dict[colour][0]), np.array(colour_dict[colour][1]))
 
@@ -162,7 +162,7 @@ class Camera():
         cv2.imshow("Image with matches", img3)
         cv2.waitKey(5)
 
-        return np.array(position), orientation
+        return position, orientation
 
     def init_blocks(self):
         """Initialises the blocks"""
@@ -173,16 +173,15 @@ class Camera():
         blurred_blue = self.apply_mask(hsv, "blue")
         cnts = self.find_contours(blurred_blue)
 
-        good_c = list(filter(lambda x: cv2.contourArea(x) < 200 and cv2.contourArea(x) > 100, cnts))
+        #good_c = cnts
 
-        if len(good_c) > 10:
-            print("ValueError(You fucked it, more than 10 blue contours found)")
+        good_c = list(filter(lambda x: cv2.contourArea(x) < 80 and cv2.contourArea(x) > 50, cnts))
 
-        i = 0
+        print("Blocks found:", len(good_c))
+
         for c in good_c:
             centroid = self.calculate_moment(c)
-            blocks.append(Block(np.array(centroid), i))
-            i += 1
+            blocks.append(Block(np.array(centroid)))
 
             # draw the contour and center of the shape on the image
             cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
@@ -191,23 +190,40 @@ class Camera():
         # show the image
         cv2.imshow("Image with locations", frame)
         #cv2.imwrite("frame_drawn_on.png", frame)
-        cv2.waitKey(5)
+        cv2.waitKey(500)
+
         print("Blocks made")
 
         return blocks
 
-    def update_blocks(self):    #use some kind of conditional parametr so the hsv image from previous can be re-used
+    def update_blocks(self, blocks):
         """Updates the positions of the blocks"""
-        hsv = take_shot()
-        blurred_blue = apply_mask(hsv, "blue")
-        centroids = find_centroid(blurred_blue)
-        if len(centroids) > 10:
-            raise ValueError("You fucked it, more than 10 blue contours found")
-        else:
-            for centroid in centroids:
-                pass
-                #have to somehow only update their position using the approximate positions of the previous
-                #distance matrix?? each element to the other one
+
+        frame = self.take_shot()
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        blurred_blue = self.apply_mask(hsv, "blue")
+        cnts = self.find_contours(blurred_blue)
+
+        good_c = list(filter(lambda x: cv2.contourArea(x) < 80 and cv2.contourArea(x) > 50, cnts))
+        current_block_locations = np.array([x.position for x in blocks])
+        i = 0
+        for c in good_c:
+            centroid = self.calculate_moment(c)
+            if len(list(filter(lambda x: np.linalg.norm(x-np.array(centroid)) < 5, current_block_locations))) == 0:
+                blocks.append(Block(np.array(centroid)))
+                i += 1
+        for block in blocks:
+            # draw the contour and center of the shape on the image
+            cv2.circle(frame, tuple(block.position), 3, (255, 0, 255), -1)
+
+        # show the image
+        cv2.imshow("Image with locations", frame)
+        # cv2.imwrite("frame_drawn_on.png", frame)
+        cv2.waitKey(500)
+
+        print("Blocks out of total:", len(blocks))
+
+        return blocks
 
     def close(self):
         #self.cap.release()

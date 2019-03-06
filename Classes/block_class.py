@@ -1,12 +1,11 @@
 class Block():
-    def __init__(self, position, id):
+    def __init__(self, position):
         """Sets up a Block object"""
         self.position = position
         self.tested = False
         self.nuclear = None
         self.picked_up = False
         self.assigned = False
-        self.id = id
 
     def update_position(self, new_position):
         """Updates the position of the block"""
