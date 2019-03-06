@@ -28,13 +28,20 @@ void setup() {
 
   led = new LED(LED_BUILTIN); //these declarations must come after Serial & AFMS
   led->print_device_location();
+<<<<<<< master
 >>>>>>> Sensor base class
   right_fwd = new DCMotor(1,FORWARD);
   right_fwd->print_device_location();
+=======
+//  right_fwd = new DCMotor(1,FORWARD);
+//  right_fwd->print_device_location();
+>>>>>>> Get LED to turn on with button
   push_button = new Button(2);
+  push_button->print_device_location();
 }
 
 void loop() {
+<<<<<<< master
 	//genericIO.print_pin_state();
 	//do some blinking
 <<<<<<< master
@@ -44,22 +51,16 @@ void loop() {
 	delay(1000);
 	led->set_state(LOW);
 	delay(1000);
+=======
+	//read button state
+>>>>>>> Get LED to turn on with button
 
-	//do some motoring
-
-	int i;
-	Serial.println("tick");
-
-	led->set_state(HIGH);
-	for (i=0; i<255; i++) {
-		right_fwd->set_state(i);
-		delay(10);
+	if (push_button->state_changed()){
+		Serial.println("boop");
+		led->set_state(push_button->read_state());
 	}
-	led->set_state(LOW);
-	for (i=255; i!=0; i--) {
-		right_fwd->set_state(i);
-		delay(10);
-	}
+
+
 }
 =======
 //#include "Arduino.h"
