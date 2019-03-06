@@ -11,17 +11,24 @@ initialise_connection.handshake(arduino_port)
 
 arduino_coms = coms_class.Coms(arduino_port)
 
-arduino_coms.forward(78)
-time.sleep(2)
-arduino_coms.backward(78)
-time.sleep(2)
-for i in range(6):
-    arduino_coms.turn(78, "clockwise")
-    time.sleep(0.3)
-    arduino_coms.turn(78, "anticlockwise")
-    time.sleep(0.3)
-arduino_coms.stop()
+# arduino_coms.forward(78)
+# time.sleep(2)
+# arduino_coms.backward(78)
+# time.sleep(2)
+# for i in range(6):
+#     arduino_coms.turn(78, "clockwise")
+#     time.sleep(0.3)
+#     arduino_coms.turn(78, "anticlockwise")
+#     time.sleep(0.3)
+# arduino_coms.stop()
 
-arduino_coms.servo(0)
+for i in range(8):
+
+    arduino_coms.servo_state("right")
+    time.sleep(0.5)
+    arduino_coms.servo_state("left")
+    time.sleep(0.5)
+arduino_coms.servo_state("centre")
+
 arduino_port.close()
 print("port closed")

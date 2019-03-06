@@ -10,6 +10,9 @@ DCMotor* right_fwd;
 DCMotor* right_bwd;
 DCMotor* left_fwd;
 DCMotor* left_bwd;
+DCMotor* pulley_up;
+DCMotor* pulley_down;
+
 IDP_servo* selector_servo;
 
 void establishContact();
@@ -20,13 +23,15 @@ void setup() {
 	AFMS.begin();   // create with the default frequency 1.6KHz
 
 	// I/O object definitions
+	//Motors and servos
   led = new LED(LED_BUILTIN);
   right_fwd = new DCMotor(1,FORWARD);
   right_bwd = new DCMotor(1,BACKWARD);
   left_fwd = new DCMotor(2, FORWARD);
   left_bwd = new DCMotor(2, BACKWARD);
+  pulley_up = new DCMotor(3, FORWARD);
+  pulley_down = new DCMotor(3, BACKWARD);
   selector_servo = new IDP_servo(9); // pin 9
-  //right_fwd->print_pin_state();
   // start serial port at 9600 bps:
   Serial.begin(9600);
   while (!Serial) {
@@ -56,8 +61,14 @@ void loop() {
     	    break;
     	case 'e':
 			selector_servo->set_state(int(input_command[1])); //position arg
-
 			break;
+    	case 'f':
+			pulley_up->set_state(int(input_command[1]));
+			break;
+    	case 'g':
+			left_bwd->set_state(int(input_command[1]));
+			break;
+
     	default :;
     	}
     // clear the string:
