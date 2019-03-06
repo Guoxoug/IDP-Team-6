@@ -4,11 +4,14 @@
 >>>>>>> Getting motor test running
 #include "Arduino.h"
 #include "DeviceControllers.h"
+#include "Vector.h"
+
 
 //IO genericIO = new IO(LED_BUILTIN);
 LED* led;
 DCMotor* right_fwd;
 Button* push_button;
+Vector<IO> outputs;
 
 void setup() {
   Serial.begin(9600);           //Start serial and set the correct Baud Rate
@@ -38,6 +41,7 @@ void setup() {
 >>>>>>> Get LED to turn on with button
   push_button = new Button(2);
   push_button->print_device_location();
+
 }
 
 void loop() {
@@ -55,7 +59,7 @@ void loop() {
 	//read button state
 >>>>>>> Get LED to turn on with button
 
-	if (push_button->state_changed()){
+	if (push_button->state_changed()){ //needs debouncing
 		Serial.println("boop");
 		led->set_state(push_button->read_state());
 	}
