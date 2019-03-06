@@ -27,7 +27,7 @@ Sensor::Sensor(int pin_number) : IO(pin_number){
 	pinMode(pin, INPUT);
 }
 
-void Sensor::set_state(int power) {
+void Sensor::set_state(int isEnabled) {
 	//here we enable the sensor to take readings, maybe hook up some interrupts
 }
 
