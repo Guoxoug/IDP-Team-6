@@ -39,17 +39,24 @@ class Robot():
         #print("Updated position:", self.position)
         #print("Updated orientation:", self.orientation)
 
-    def find_next_target(self):
+    def find_next_target(self, blocks):
         """Use the camera to find the next destination as position coordinates"""
-        pass
+        blocks_sorted = sorted(blocks, key=lambda x: self.get_distance_angle_target(x)[0])
 
-    def get_distance(self):
-        """Gets the distance of itself (midpoint of circles) relative to Block"""
-        #always call update_position before this
-        #should be linked with get_orientation
-        pass  #use self.target
+        #For testing only:
+        blocks_dist = [self.get_distance_angle_target(block)[0] for block in blocks_sorted]
+        print(blocks_dist)
 
-    def get_distance_angle_target(self):
+        return blocks_sorted[0]
+
+    def go_towards_target(self):
+        """Turns and moves towards the target, returns True if there"""
+
+        self.turn()
+        self.move_forward()
+        print("Arrived at destination")
+
+    def get_distance_angle_target(self, target):
         """Gets the orientation of itself relative to Block using angle between line of circle-circle and centre-circle
         clockwise is positive rotation
         """
@@ -58,7 +65,7 @@ class Robot():
 
         orientation_rad = np.deg2rad(self.orientation)
         vertical_vector = np.array([0,-1])
-        robot_block_vector = self.target.position - self.position  #vector from robot to block
+        robot_block_vector = target.position - self.position  #vector from robot to block
 
         self.distance = np.linalg.norm(robot_block_vector)
         print("Distance is:", self.distance)
@@ -107,8 +114,7 @@ class Robot():
             control = pid(self.distance)
             i += 1
 
-
-        print("Arrived at destination")
+        print("Stopped moving forward")
 
         self.coms.stop()
         """

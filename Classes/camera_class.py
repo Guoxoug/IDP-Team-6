@@ -31,6 +31,8 @@ class Camera():
         self.cap = VideoCaptureAsync(0)
         self.cap.start()
 
+        self.blocks = []
+
         frame = self.cap.read()
 
 
@@ -164,37 +166,18 @@ class Camera():
 
         return position, orientation
 
-    def init_blocks(self):
+    def init_blocks(self, num = 10):
         """Initialises the blocks"""
-        blocks = []
 
-        frame = self.take_shot()
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        blurred_blue = self.apply_mask(hsv, "blue")
-        cnts = self.find_contours(blurred_blue)
+        for i in range(0,num):
+            self.blocks = self.update_blocks(self,self.blocks)
 
-        #good_c = cnts
-
-        good_c = list(filter(lambda x: cv2.contourArea(x) < 80 and cv2.contourArea(x) > 50, cnts))
-
-        print("Blocks found:", len(good_c))
-
-        for c in good_c:
-            centroid = self.calculate_moment(c)
-            blocks.append(Block(np.array(centroid)))
-
-            # draw the contour and center of the shape on the image
-            cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
-            cv2.circle(frame, centroid, 3, (255, 0, 255), -1)
-
-        # show the image
-        cv2.imshow("Image with locations", frame)
-        #cv2.imwrite("frame_drawn_on.png", frame)
-        cv2.waitKey(500)
+        # Later do a while len(self.blocks) < 10:
+        # or rather do a, if it still doesn't have 10 use hsv value of a current block
 
         print("Blocks made")
 
-        return blocks
+        return self.blocks
 
     def update_blocks(self, blocks):
         """Updates the positions of the blocks"""
@@ -233,3 +216,29 @@ class Camera():
 
     def __repr__(self):
         return "Camera :\n open: {}".format(self.open)
+
+"""
+frame = self.take_shot()
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        blurred_blue = self.apply_mask(hsv, "blue")
+        cnts = self.find_contours(blurred_blue)
+
+        #good_c = cnts
+
+        good_c = list(filter(lambda x: cv2.contourArea(x) < 80 and cv2.contourArea(x) > 50, cnts))
+
+        print("Blocks found:", len(good_c))
+
+        for c in good_c:
+            centroid = self.calculate_moment(c)
+            blocks.append(Block(np.array(centroid)))
+
+            # draw the contour and center of the shape on the image
+            cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
+            cv2.circle(frame, centroid, 3, (255, 0, 255), -1)
+
+        # show the image
+        cv2.imshow("Image with locations", frame)
+        #cv2.imwrite("frame_drawn_on.png", frame)
+        cv2.waitKey(500)
+"""
