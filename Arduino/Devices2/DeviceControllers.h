@@ -9,8 +9,10 @@
 #define DEVICECONTROLLERS_H_
 
 #include "Adafruit_MotorShield.h"
+#include "Vector.h"
 
 extern Adafruit_MotorShield AFMS;
+
 
 class IO {
 	//Base class to define any sort of input/output by associating it with a pin
@@ -32,6 +34,8 @@ public:
 	bool state_changed();
 	void set_state(int power);//this function should be used to enable/disable a sensor
 };
+
+extern Vector<Sensor*> activeSensors;
 
 class Button : public Sensor {//could probably just be a digital sensor
 public:

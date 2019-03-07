@@ -8,9 +8,11 @@
 #include "DeviceControllers.h"
 #include "Arduino.h"
 #include "Adafruit_MotorShield.h"
+#include "Vector.h"
 
 const int max_arg = 8;
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+Vector<Sensor*> activeSensors = Vector<Sensor*>();
 
 
 IO::IO(int pin_number){ //Parameterised constructor for generic IO
@@ -36,7 +38,11 @@ bool Sensor::state_changed(){ //default state changed check is pretty literal
 }
 
 void Sensor::set_state(int isEnabled){
-	;//placeholder, should be adding to sensor list
+	if (isEnabled == 1){
+		activeSensors.push_back(this); //add to vector containing all sensors
+	} else {
+		//IDK how to remove/ 'disable'
+	}
 }
 
 Button::Button(int pin_number) : Sensor(pin_number){}
