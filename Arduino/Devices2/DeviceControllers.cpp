@@ -8,7 +8,7 @@
 #include "DeviceControllers.h"
 #include "Arduino.h"
 #include "Adafruit_MotorShield.h"
-#include "Vector.h"
+#include "Vector.h" //right now this aint working
 
 const int max_arg = 8;
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
