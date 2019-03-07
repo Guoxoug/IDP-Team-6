@@ -35,6 +35,10 @@ bool Sensor::state_changed(){ //default state changed check is pretty literal
 	return state_changed;
 }
 
+void Sensor::set_state(int isEnabled){
+	;//placeholder, should be adding to sensor list
+}
+
 Button::Button(int pin_number) : Sensor(pin_number){}
 
 
