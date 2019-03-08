@@ -8,9 +8,11 @@
 #include "DeviceControllers.h"
 #include "Arduino.h"
 #include "Adafruit_MotorShield.h"
+#include "Vector.h" //right now this aint working
 
 const int max_arg = 8;
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+Vector<Sensor*> activeSensors = Vector<Sensor*>();
 
 
 IO::IO(int pin_number){ //Parameterised constructor for generic IO
@@ -18,9 +20,36 @@ IO::IO(int pin_number){ //Parameterised constructor for generic IO
 	Serial.println("IO constructor");
 }
 
-void IO::print_pin_state(){
+void IO::print_device_location(){
 	Serial.print("IO is located on pin/port: ");
 	Serial.println(pin);
+}
+
+Sensor::Sensor(int pin_number) : IO(pin_number){
+	pinMode(pin, INPUT);
+}
+
+bool Sensor::state_changed(){ //default state changed check is pretty literal
+	//if this works I'll be very impressed, considering read_state isn't defined yet
+	int new_state = read_state();
+	bool state_changed = (old_state != new_state);
+	old_state = new_state; //save for next time
+	return state_changed;
+}
+
+void Sensor::set_state(int isEnabled){
+	if (isEnabled == 1){
+		activeSensors.push_back(this); //add to vector containing all sensors
+	} else {
+		//IDK how to remove/ 'disable'
+	}
+}
+
+Button::Button(int pin_number) : Sensor(pin_number){}
+
+
+int Button::read_state(){
+	return digitalRead(pin);
 }
 
 LED::LED(int pin_number) : IO(pin_number){
