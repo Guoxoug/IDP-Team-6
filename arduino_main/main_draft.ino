@@ -14,7 +14,8 @@ DCMotor* pulley_up;
 DCMotor* pulley_down;
 DCMotor* pusher_out;
 DCMotor* pusher_in;
-
+Button* hall_effect;
+Button* IR_sensor;
 IDP_servo* selector_servo;
 
 void establishContact();
@@ -36,6 +37,8 @@ void setup() {
   pusher_out = new DCMotor(4, FORWARD);
   pusher_in = new DCMotor(4, BACKWARD);
   selector_servo = new IDP_servo(9); // pin 9
+  hall_effect = new Button(2); // pin 2
+  IR_sensor = new Button(4);
   // start serial port at 9600 bps:
   Serial.begin(9600);
   while (!Serial) {
@@ -77,6 +80,12 @@ void loop() {
 			break;
 		case 'i':
 			pusher_in->set_state(int(input_command[1]));
+			break;
+		case 'j':
+			Serial.write(hall_effect -> read_state());
+			break;
+		case 'k':
+			Serial.write(IR_sensor -> read_state());
 			break;
     	default :;
     	}

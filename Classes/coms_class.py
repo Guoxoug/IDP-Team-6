@@ -169,9 +169,9 @@ class Coms():
     def pusher_activate(self):
 
         self.pusher("push")
-        time.sleep(3)
+        time.sleep(3.5)
         self.pusher("retract")
-        time.sleep(3)
+        time.sleep(3.5)
         self.pusher("stop")
 
 
@@ -184,3 +184,32 @@ class Coms():
         self.pulley("up")
         time.sleep(0.8)
         self.pulley_activate()
+
+    """Request for sensor info"""
+
+    def hall_effect(self):
+        """request hall effect info"""
+        self.serial.reset_input_buffer()  # clear buffer
+        self.send(b"jj\n")
+        #  next line depends on read timeout
+        result = self.serial.read(1)
+        if result == b'':
+            print("no hall effect data returned")
+            return 2  # if 2 returned do it again
+        else:
+            result = int.from_bytes(result, "big")
+            return result
+
+    def IR_sensor(self):
+        """request hall effect info"""
+        self.serial.reset_input_buffer()  # clear buffer
+        self.send(b"kk\n")
+        #  next line depends on read timeout
+        result = self.serial.read(1)
+        if result == b'':
+            print("no IR data returned")
+            return 2  # if 2 returned do it again
+        else:
+            result = int.from_bytes(result, "big")
+            return result
+
