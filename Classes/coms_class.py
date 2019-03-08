@@ -75,6 +75,25 @@ class Coms():
                 # newline indicates end of command to arduino
                 self.send(command)
                 print("command: ", command)
+        if motor_name == "pusher":
+            if power >= 0:
+                input_power = round(power / 100 * 255)
+                command += b"h"
+                command += bytes([input_power])
+                command += b"\n"
+                # newline indicates end of command to arduino
+                self.send(command)
+                print("command: ", command)
+            elif power < 0:
+                input_power = -round(power / 100 * 255)
+                command += b"i"
+                command += bytes([input_power])
+                command += b"\n"
+                # newline indicates end of command to arduino
+                self.send(command)
+                print("command: ", command)
+
+
     # Movement methods
     # Self explanatory ^^
     # power always int 0-100
@@ -129,10 +148,39 @@ class Coms():
             self.motor(0, "pulley")
 
     def pulley_activate(self):
+        """Time ration for up/down is approx 1.4"""
         self.pulley("up")
-        time.sleep(2)  # placeholder time for rising pulley
-        self.pulley("down")
+        time.sleep(5*0.7)  # placeholder time for rising pulley
+        self.pulley("stop")
         time.sleep(2)
+        self.pulley("down")
+        time.sleep(5*0.5)
         self.pulley("stop")
 
 
+    def pusher(self, state: str):
+        if state == "push":
+            self.motor(70, "pusher")  # placeholder power
+        elif state == "retract":
+            self.motor(-70, "pusher")
+        elif state == "stop":
+            self.motor(0, "pusher")
+
+    def pusher_activate(self):
+
+        self.pusher("push")
+        time.sleep(3)
+        self.pusher("retract")
+        time.sleep(3)
+        self.pusher("stop")
+
+
+    def offload(self):
+        self.pulley("down")
+        time.sleep(0.7)
+        self.pulley("stop")# placeholder time for rising pulley
+        self.pusher_activate()
+
+        self.pulley("up")
+        time.sleep(0.8)
+        self.pulley_activate()

@@ -24,11 +24,15 @@ arduino_coms = coms_class.Coms(arduino_port)
 
 for i in range(8):
 
-    arduino_coms.servo_state("right")
+    arduino_coms.pulley("down")
+    time.sleep(0.7)
+    arduino_coms.pulley("stop")
+    time.sleep(2)
+    arduino_coms.pulley("up")
+    time.sleep(0.8)
+    arduino_coms.pulley("stop")
     time.sleep(0.5)
-    arduino_coms.servo_state("left")
-    time.sleep(0.5)
-arduino_coms.servo_state("centre")
+arduino_coms.pulley("stop")
 
 arduino_port.close()
 print("port closed")

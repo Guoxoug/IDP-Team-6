@@ -12,6 +12,8 @@ DCMotor* left_fwd;
 DCMotor* left_bwd;
 DCMotor* pulley_up;
 DCMotor* pulley_down;
+DCMotor* pusher_out;
+DCMotor* pusher_in;
 
 IDP_servo* selector_servo;
 
@@ -31,6 +33,8 @@ void setup() {
   left_bwd = new DCMotor(2, BACKWARD);
   pulley_up = new DCMotor(3, FORWARD);
   pulley_down = new DCMotor(3, BACKWARD);
+  pusher_out = new DCMotor(4, FORWARD);
+  pusher_in = new DCMotor(4, BACKWARD);
   selector_servo = new IDP_servo(9); // pin 9
   // start serial port at 9600 bps:
   Serial.begin(9600);
@@ -66,9 +70,14 @@ void loop() {
 			pulley_up->set_state(int(input_command[1]));
 			break;
     	case 'g':
-			left_bwd->set_state(int(input_command[1]));
+			pulley_down->set_state(int(input_command[1]));
 			break;
-
+    	case 'h':
+			pusher_out->set_state(int(input_command[1]));
+			break;
+		case 'i':
+			pusher_in->set_state(int(input_command[1]));
+			break;
     	default :;
     	}
     // clear the string:
