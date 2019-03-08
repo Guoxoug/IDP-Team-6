@@ -1,6 +1,12 @@
 from init_connection import initialise_connection
 import numpy as np
 
+#servo 2 for sorter
+# M1 right
+#m2 left
+#m3 pulley
+#m4 pusher
+
 class Coms():
     """All messages are """
     def __init__(self, serial):
@@ -71,11 +77,11 @@ class Coms():
     # power always int 0-100
     def forward(self, power):
         self.motor(power, "right")
-        self.motor(0.92*power, "left")
+        self.motor(1.02*power, "left")
 
     def backward(self, power):   #red left, white right
         self.motor(-power, "right")
-        self.motor(-0.92*power, "left")
+        self.motor(-1.02*power, "left")
 
     def turn(self, power):
         if np.sign(power) == 1:

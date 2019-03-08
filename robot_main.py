@@ -20,13 +20,23 @@ initialise_connection.handshake(arduino_port)
 arduino_coms = coms_class.Coms(arduino_port)
 
 arduino_coms.stop()
+arduino_coms.servo_state("centre")
+
 
 camera = Camera()
 blocks = camera.init_blocks()
 robot = Robot(camera, arduino_coms)
 
-robot.target = find_next_target(blocks)
-robot.go_towards_target()
+conflict, conflict_blocks = camera.check_initial_clear()
+if conflict:
+    while len(conflict) != 0:
+        robot.target = robot.find_next_target(conflict_blocks)
+        robot.go_towards_target()
+    #go towards other thing
+else:
+    robot.simple_forward(1800)
+    robot.simple_turn(600, -1)
+
 
 #check IR
 #if yes, check hall effect update block.tested and block.nuclear

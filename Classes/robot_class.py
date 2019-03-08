@@ -36,8 +36,6 @@ class Robot():
         self.ori_array.append(next_orientation)
         self.orientation = np.median(self.ori_array)
         self.position = np.median(self.pos_array, axis = 0)
-        #print("Updated position:", self.position)
-        #print("Updated orientation:", self.orientation)
 
     def find_next_target(self, blocks):
         """Use the camera to find the next destination as position coordinates"""
@@ -55,6 +53,10 @@ class Robot():
         self.turn()
         self.move_forward()
         print("Arrived at destination")
+
+        print("Final push")
+        for i in range(0, 500):
+            self.coms.forward(50)
 
     def get_distance_angle_target(self, target):
         """Gets the orientation of itself relative to Block using angle between line of circle-circle and centre-circle
@@ -93,10 +95,12 @@ class Robot():
     def move_forward(self, p=0.5, i=0.1, d=0.1, num=1000):
         """Moves the robot forward"""
         margin_ori = 20
-        set_point = 50
+        set_point = 40
         pid = PID(p, i, d, setpoint = set_point)
-        self.distance, self.angle = self.get_distance_angle_target()
+        #pid.proportional_on_measurement = True
         pid.output_limits = (-50, 50)
+
+        self.distance, self.angle = self.get_distance_angle_target(self.target)
         control = pid(self.distance)
         i = 0
 
@@ -106,10 +110,13 @@ class Robot():
                 self.coms.stop()
                 self.turn()
             print("Control dist output:", control*-1)
-            print("Components dist", pid.components)  # the separate terms are now in p, i, d)
-            self.coms.forward(int(control*-1))
+            print("Components dist", pid.components) # the separate terms are now in p, i, d)
+            if np.abs(control) > 20:
+                self.coms.forward(int(control*-1))
+            else:
+                self.coms.forward(int(20*-1))
 
-            self.distance, self.angle = self.get_distance_angle_target()
+            self.distance, self.angle = self.get_distance_angle_target(self.target)
 
             control = pid(self.distance)
             i += 1
@@ -136,10 +143,20 @@ class Robot():
         """Moves the robot backward"""
         pass
 
+    def simple_forward(self, num):
+        for i in range(0, num):
+            self.coms.forward(50)
+        self.coms.stop()
+
+    def simple_turn(self, num, sign):
+        for i in range(0, num):
+            self.coms.turn(sign*20)
+        self.coms.stop()
+
     def turn(self, p = 0.5, i = 0.1, d = 0.1, num = 40):
         margin = 10
         pid = PID(p, i, d, setpoint = 0)
-        self.distance, self.angle = self.get_distance_angle_target()
+        self.distance, self.angle = self.get_distance_angle_target(self.target)
         pid.output_limits = (-50, 50)
         control = pid(self.angle)
         i = 0
@@ -149,7 +166,7 @@ class Robot():
             print("Components", pid.components)  # the separate terms are now in p, i, d)
             self.coms.turn(int(control*-1))
 
-            self.distance, self.angle = self.get_distance_angle_target()
+            self.distance, self.angle = self.get_distance_angle_target(self.target)
 
             control = pid(self.angle)
             i += 1

@@ -11,8 +11,10 @@ class Camera():
     Y = 480  # Dimensions of camera feed
     x, y = np.meshgrid(np.arange(0, X), np.arange(0, Y))
     condition = (x < 10) | (x > X - 20) | ((x > 586) & (y > 160) & (y < 274)) | ((x > 430) & (y < 50))  # | (y < 10) | (y > Y-10)      and | ((x > 313) & (x < 322)) for vertical line
+    block_condition = (x > 313)  # | ((x > centre -10) & (x < centre +10) & (y > centre -10) & (y < centre +10))
+    #set_block_coordinates = []
 
-    robot_query = cv2.imread('robot_query_7.png', 0)
+    robot_query = cv2.imread('robot_query_8.png', 0)
 
     # Initiate SIFT detector
     sift = cv2.xfeatures2d.SIFT_create()
@@ -58,7 +60,7 @@ class Camera():
         """Returns the blurred mask"""
 
         # Colour required to identify features in format (H in degrees, S decimal, V decimal)
-        blue = (196, 0.43, 0.91)   #210, 0.52, 0.87
+        blue = (200, 0.35, 0.91)   #210, 0.52, 0.87
         red = (1, 0.44, 0.93)
         green = (165, 0.79, 0.64)
         purple = (345, 0.26, 0.49)  # Change! RGB 234, 12, 208
@@ -170,8 +172,10 @@ class Camera():
         """Initialises the blocks"""
 
         for i in range(0,num):
-            self.blocks = self.update_blocks(self,self.blocks)
+            self.blocks = self.update_blocks(self.blocks)
 
+        #for coor in self.set_block_coordinates:
+        #    self.blocks.append(Block(np.array(coor)))
         # Later do a while len(self.blocks) < 10:
         # or rather do a, if it still doesn't have 10 use hsv value of a current block
 
@@ -183,6 +187,7 @@ class Camera():
         """Updates the positions of the blocks"""
 
         frame = self.take_shot()
+        frame[self.block_condition] = 0
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         blurred_blue = self.apply_mask(hsv, "blue")
         cnts = self.find_contours(blurred_blue)
@@ -195,6 +200,7 @@ class Camera():
             if len(list(filter(lambda x: np.linalg.norm(x-np.array(centroid)) < 5, current_block_locations))) == 0:
                 blocks.append(Block(np.array(centroid)))
                 i += 1
+
         for block in blocks:
             # draw the contour and center of the shape on the image
             cv2.circle(frame, tuple(block.position), 3, (255, 0, 255), -1)
@@ -208,6 +214,17 @@ class Camera():
 
         return blocks
 
+    def check_initial_clear(self):
+        conflict_blocks = []
+        conflict = False
+
+        for block in self.blocks:
+            if block.position[1] > 390 or (block.position[0] < 125 and block.position[1] > 335):
+                conflict_blocks.append(block)
+                conflict = True
+
+        return conflict, conflict_blocks
+
     def close(self):
         #self.cap.release()
         self.cap.stop()
@@ -216,29 +233,3 @@ class Camera():
 
     def __repr__(self):
         return "Camera :\n open: {}".format(self.open)
-
-"""
-frame = self.take_shot()
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        blurred_blue = self.apply_mask(hsv, "blue")
-        cnts = self.find_contours(blurred_blue)
-
-        #good_c = cnts
-
-        good_c = list(filter(lambda x: cv2.contourArea(x) < 80 and cv2.contourArea(x) > 50, cnts))
-
-        print("Blocks found:", len(good_c))
-
-        for c in good_c:
-            centroid = self.calculate_moment(c)
-            blocks.append(Block(np.array(centroid)))
-
-            # draw the contour and center of the shape on the image
-            cv2.drawContours(frame, [c], -1, (0, 255, 0), 1)
-            cv2.circle(frame, centroid, 3, (255, 0, 255), -1)
-
-        # show the image
-        cv2.imshow("Image with locations", frame)
-        #cv2.imwrite("frame_drawn_on.png", frame)
-        cv2.waitKey(500)
-"""
