@@ -5,7 +5,7 @@
 #include "DeviceControllers.h"
 #include "Adafruit_MotorShield.h"
 #include <Servo.h>
-LED* led;
+
 DCMotor* right_fwd;
 DCMotor* right_bwd;
 DCMotor* left_fwd;
@@ -14,9 +14,11 @@ DCMotor* pulley_up;
 DCMotor* pulley_down;
 DCMotor* pusher_out;
 DCMotor* pusher_in;
-Button* hall_effect;
+Button* hall_effect1;
+Button* hall_effect2;
 Button* IR_sensor;
 IDP_servo* selector_servo;
+LED* drive_led;
 
 void establishContact();
 String input_command = "";         // a String to hold incoming data
@@ -27,7 +29,7 @@ void setup() {
 
 	// I/O object definitions
 	//Motors and servos
-  led = new LED(LED_BUILTIN);
+  drive_led = new LED(7);
   right_fwd = new DCMotor(1,FORWARD);
   right_bwd = new DCMotor(1,BACKWARD);
   left_fwd = new DCMotor(2, FORWARD);
@@ -37,7 +39,8 @@ void setup() {
   pusher_out = new DCMotor(4, FORWARD);
   pusher_in = new DCMotor(4, BACKWARD);
   selector_servo = new IDP_servo(9); // pin 9
-  hall_effect = new Button(2); // pin 2
+  hall_effect1 = new Button(2); // pin 2
+  hall_effect2 = new Button(3);
   IR_sensor = new Button(4);
   // start serial port at 9600 bps:
   Serial.begin(9600);
@@ -82,11 +85,14 @@ void loop() {
 			pusher_in->set_state(int(input_command[1]));
 			break;
 		case 'j':
-			Serial.write(hall_effect -> read_state());
+			Serial.write((hall_effect1 -> read_state())||(hall_effect2 -> read_state()));
 			break;
 		case 'k':
 			Serial.write(IR_sensor -> read_state());
 			break;
+		case 'l':
+			drive_led -> set_state(int(input_command[1]));
+
     	default :;
     	}
     // clear the string:
