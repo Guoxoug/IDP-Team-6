@@ -18,7 +18,7 @@ class Camera():
                                    (x > 47 - 10) & (x < 47 + 10) & (y > 319 - 10) & (y < 319 + 10)) | (x > 313)
     set_block_coordinates = [[47, 319], [42,270], [42, 219], [42, 172], [44, 121]]
 
-    robot_query = cv2.imread('robot_query_9_reverse.png', 0)
+    robot_query = cv2.imread('robot_query_10_reverse.png', 0)
 
     # Initiate SIFT detector
     sift = cv2.xfeatures2d.SIFT_create()
@@ -105,6 +105,7 @@ class Camera():
         Returns (x,y) and angle in °
 
         """
+        k = 1
         frame = self.take_shot()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -168,7 +169,8 @@ class Camera():
                 frame, position, orientation = self.get_position_orientation_robot()
                 return frame, position, orientation
             else:
-                self.simple_backward(150)
+                self.simple_backward(k*200)
+                k *= -1
                 self.iter_no_match = 0
                 frame, position, orientation = self.get_position_orientation_robot()
                 return frame, position, orientation
@@ -187,11 +189,11 @@ class Camera():
 
     def init_blocks(self, num = 10):
         """Initialises the blocks"""
-
-        #for coor in self.set_block_coordinates:
-        #    self.blocks[self.num_blocks] = Block(np.array(coor), self.num_blocks)
-        #    self.num_blocks += 1
-
+        """
+        for coor in self.set_block_coordinates:
+            self.blocks[self.num_blocks] = Block(np.array(coor), self.num_blocks)
+            self.num_blocks += 1
+        """
         for i in range(0,num):
             self.blocks = self.update_blocks(self.blocks)
 

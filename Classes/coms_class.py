@@ -138,7 +138,7 @@ class Coms():
         self.pulley("stop")
         time.sleep(2)
         self.pulley("down")
-        time.sleep(3.1)
+        time.sleep(2.85)
         self.pulley("stop")
 
     def pusher(self, state: str):
@@ -151,14 +151,14 @@ class Coms():
 
     def pusher_activate(self):
         self.pusher("push")
-        time.sleep(2.05)   #Definitely not above 3.2!!!
+        time.sleep(2.0)   #Definitely not above 3.2!!!
         self.pusher("retract")
         time.sleep(3.2)
         self.pusher("stop")
 
     def offload(self):
         self.pulley("down")
-        time.sleep(0.77)
+        time.sleep(0.97)
         self.pulley("stop")# placeholder time for rising pulley
         self.pusher_activate()
 

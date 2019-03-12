@@ -31,6 +31,7 @@ class Robot:
         print("Length ori_array:", len(self.ori_array))
         self.update_position()
 
+
     def update_position(self):
         """Updates the position of the robot using the self.front and self.back circles"""
         # some function camera.update_robot()
@@ -76,25 +77,26 @@ class Robot:
         print("Checking hall effect sensor")
         while len(outputs) <= 10:
             nuclear_output = self.coms.hall_effect()
-            print(nuclear_output)
+
             if nuclear_output != 2:
                 outputs.append(nuclear_output)
 
         nuclear_output = mode(outputs)
         print("Output HE received:", nuclear_output, type(nuclear_output))
-        """
+
         if nuclear_output == 1:
+            print("Nuclear")
             self.target.tested = True
             self.target.nuclear = True
             return True
         elif nuclear_output == 0:
+            print("Safe")
             self.target.tested = True
             self.target.nuclear = False
             return False
-        """
-        return nuclear_output
 
     def IR_check(self):
+        """
         IR_output = 2
 
         while IR_output == 2:
@@ -103,14 +105,23 @@ class Robot:
 
         print("Output IR received:", IR_output, type(IR_output))
 
-        if IR_output == 1:
+        if IR_output == 0:
             self.target.present = True
             return True
-        elif IR_output == 0:
+        elif IR_output == 1:
             self.target.present = False
             return False
         else:
             raise ValueError("IR_output is not 1 or 0, see above")
+        """
+        IR_output = 2
+
+        while IR_output == 2:
+            print("Checking IR sensor")
+            IR_output = self.coms.IR_sensor()
+
+        print("Output IR received:", IR_output, type(IR_output))
+        return IR_output
 
     def sort(self):
         if self.target.tested == True:
@@ -118,7 +129,8 @@ class Robot:
                 print("Flushing")
                 self.coms.servo_state("right")
                 time.sleep(0.5)
-                self.simple_forward(125)
+                self.simple_forward(140)
+                time.sleep(0.5)
                 self.coms.servo_state("centre")
                 return True
 
@@ -126,7 +138,8 @@ class Robot:
                 print("Placing in holding area")
                 self.coms.servo_state("left")
                 time.sleep(0.5)
-                self.simple_forward(125)
+                self.simple_forward(140)
+                time.sleep(0.5)
                 self.coms.servo_state("centre")
                 return True
         else:
@@ -134,12 +147,13 @@ class Robot:
             return False
 
     def sort_procedure(self):
-        #self.IR_check()
-        #while self.target.present == False:
-        #    self.simple_forward(50)
-        #    self.IR_check()
+        self.IR_check()
+        self.coms.forward(50)
+        while self.target.present == False:
+            self.IR_check()
+        self.coms.stop()
 
-        self.simple_forward(200)
+        self.simple_forward(75)
         self.nuclear_check()
         self.sort()
 
@@ -222,9 +236,9 @@ class Robot:
             self.coms.backward(50)
         self.coms.stop()
 
-    def simple_forward(self, num):
+    def simple_forward(self, num, speed = 50):
         for i in range(0, num):
-            self.coms.forward(50)
+            self.coms.forward(speed)  #
         self.coms.stop()
 
     def simple_turn(self, num, sign):
@@ -270,7 +284,7 @@ class Robot:
         pid.output_limits = (-50, 50)
         control = pid(self.angle)
 
-        pid.proportional_on_measurement(on_measure)
+        pid.proportional_on_measurement = on_measure
 
         while(control != 0 and abs(self.angle) > margin):
             #print("Control output:", control*-1)
