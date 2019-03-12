@@ -21,7 +21,7 @@ arduino_coms.stop()
 arduino_coms.servo_state("centre")
 
 
-camera = Camera()
+camera = Camera(arduino_coms)
 blocks = camera.init_blocks()
 robot = Robot(camera, arduino_coms)
 
@@ -30,6 +30,7 @@ if conflict:
     print("Conflicts:", len(conflict_blocks))
     while len(conflict) != 0:
         robot.target = robot.find_next_target(conflict_blocks)
+
 
         conflict_blocks.pop(robot.target.id)
 

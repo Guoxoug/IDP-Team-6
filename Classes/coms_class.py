@@ -27,92 +27,80 @@ class Coms():
         #  power is between -100 and 100
         #  power to arduino func takes 0 - 255
         command = bytearray([])
+
+
         if motor_name == "right":
             if power >= 0:
                 input_power = round(power / 100 * 255)
                 command += b"a"
                 command += bytes([input_power])
-                command += b"\n"
-                # newline indicates end of command to arduino
-                self.send(command)
+
 
 
             elif power < 0:
                 input_power = -round(power / 100 * 255)
                 command += b"b"
                 command += bytes([input_power])
-                command += b"\n"
-                # newline indicates end of command to arduino
-                self.send(command)
+
         if motor_name == "left":
             if power >= 0:
                 input_power = round(power / 100 * 255)
                 command += b"c"
                 command += bytes([input_power])
-                command += b"\n"
-                # newline indicates end of command to arduino
-                self.send(command)
+
             elif power < 0:
                 input_power = -round(power / 100 * 255)
                 command += b"d"
                 command += bytes([input_power])
-                command += b"\n"
-                # newline indicates end of command to arduino
-                self.send(command)
+
         if motor_name == "pulley":
             if power >= 0:
                 input_power = round(power / 100 * 255)
                 command += b"f"
                 command += bytes([input_power])
-                command += b"\n"
-                # newline indicates end of command to arduino
-                self.send(command)
 
             elif power < 0:
                 input_power = -round(power / 100 * 255)
                 command += b"g"
                 command += bytes([input_power])
-                command += b"\n"
-                # newline indicates end of command to arduino
-                self.send(command)
+
 
         if motor_name == "pusher":
             if power >= 0:
                 input_power = round(power / 100 * 255)
                 command += b"h"
                 command += bytes([input_power])
-                command += b"\n"
-                # newline indicates end of command to arduino
-                self.send(command)
+
 
             elif power < 0:
                 input_power = -round(power / 100 * 255)
                 command += b"i"
                 command += bytes([input_power])
-                command += b"\n"
-                # newline indicates end of command to arduino
-                self.send(command)
+
+        command += b"\n"
+        # newline indicates end of command to arduino
+        self.send(command)
 
     # power always int 0-100
     def forward(self, power):
         self.motor(power, "right")
-        self.motor(1.01*power, "left")
+        self.motor(1.05*power, "left")
+        self.LED_flash("on")
 
     def backward(self, power):   #red left, white right
         self.motor(-power, "right")
-        self.motor(-1.01*power, "left")
+        self.motor(-1.05*power, "left")
+        self.LED_flash("on")
 
     def turn(self, power):
-        if np.sign(power) == 1:
-            self.motor(-power, "right")
-            self.motor(power, "left")
-        else:
-            self.motor(power, "right")
-            self.motor(-power, "left")
+        self.motor(-power, "right")
+        self.motor(power, "left")
+        self.LED_flash("on")
 
     def stop(self):
         self.motor(0, "right")
         self.motor(0, "left")
+        self.LED_flash("off")
 
     def servo(self, position: int):
         """sets position of servo in degrees 0- 180
@@ -129,11 +117,11 @@ class Coms():
 
     def servo_state(self, state: str):
         if state == "right":
-            self.servo(80-30)
+            self.servo(79-30)
         elif state == "left":
-            self.servo(80+31)
+            self.servo(79+31)
         elif state == "centre":
-            self.servo(80)
+            self.servo(79)
 
     def pulley(self, state: str):
         if state == "up":
@@ -150,9 +138,8 @@ class Coms():
         self.pulley("stop")
         time.sleep(2)
         self.pulley("down")
-        time.sleep(5*0.5)
+        time.sleep(3.1)
         self.pulley("stop")
-
 
     def pusher(self, state: str):
         if state == "push":
@@ -164,11 +151,10 @@ class Coms():
 
     def pusher_activate(self):
         self.pusher("push")
-        time.sleep(2.15)   #Definitely not above 3.2!!!
+        time.sleep(2.05)   #Definitely not above 3.2!!!
         self.pusher("retract")
         time.sleep(3.2)
         self.pusher("stop")
-
 
     def offload(self):
         self.pulley("down")
@@ -177,7 +163,7 @@ class Coms():
         self.pusher_activate()
 
         self.pulley("up")
-        time.sleep(1.2)
+        time.sleep(1.1)
         self.pulley_activate()
 
     """Request for sensor info"""
@@ -207,3 +193,13 @@ class Coms():
         else:
             result = int.from_bytes(result, "big")
             return result
+
+    def LED_flash(self, state):
+        command = bytearray(b"l")
+        if state == "on":
+            command += bytes([1])
+            command += b"\n"
+        elif state == "off":
+            command += bytes([0])
+            command += b"\n"
+        self.send(command)

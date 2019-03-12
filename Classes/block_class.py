@@ -13,4 +13,4 @@ class Block():
         position = new_position
 
     def __repr__(self):
-        return "Block {}:\n position: {}\n tested: {}\n nuclear: {}\n picked_up: {}\n assigned: {}".format(self.id, self.position, self.tested, self.nuclear, self.picked_up, self.assigned)
+        return "Block {}:\n position: {}\n tested: {}\n nuclear: {}\n presesnt: {}\n assigned: {}".format(self.id, self.position, self.tested, self.nuclear, self.present, self.assigned)

@@ -30,15 +30,17 @@ class Camera():
 
     flann = cv2.FlannBasedMatcher(index_params, search_params)
 
-    def __init__(self):
+    def __init__(self, coms):
         """Sets up a camera object and gives some pre-determined functions"""
         self.open = True
+        self.coms = coms
         #self.cap = cv2.VideoCapture(1)
         self.cap = VideoCaptureAsync(0)
         self.cap.start()
 
         self.blocks = {}
         self.num_blocks = 0
+        self.iter_no_match = 0
 
 
         frame = self.cap.read()
@@ -130,11 +132,12 @@ class Camera():
             if m.distance < 0.7 * n.distance:
                 good.append(m)
 
-        print("Good matches", len(good))
+        #print("Good matches", len(good))
 
         MIN_MATCH_COUNT = 10
 
         if len(good) > MIN_MATCH_COUNT:
+            self.iter_no_match = 0
             src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
             dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
@@ -152,34 +155,42 @@ class Camera():
 
             position = np.mean(dst_pts, axis=0)[0]
 
-            gray = cv2.polylines(gray, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
-            frame = cv2.circle(frame, tuple(np.mean(dst_pts, axis=0)[0]), 3, (255, 0, 255), -1)
+            #gray = cv2.polylines(gray, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
+            frame = cv2.circle(frame, tuple(position), 3, (255, 0, 255), -1)
+            #position_arrow = position + 45*np.array([np.sin(np.deg2rad(orientation)), np.cos(np.deg2rad(orientation))])
+            #cv2.arrowedLine(frame, position, position_arrow, (0, 255, 0), 2)
 
         else:
             print("Not enough matches are found - {} {}".format(len(good), MIN_MATCH_COUNT))
+            self.iter_no_match += 1
             matchesMask = None
-            position, orientation = self.get_position_orientation_robot()
-            return position, orientation
+            if self.iter_no_match < 20:
+                frame, position, orientation = self.get_position_orientation_robot()
+                return frame, position, orientation
+            else:
+                self.simple_backward(150)
+                self.iter_no_match = 0
+                frame, position, orientation = self.get_position_orientation_robot()
+                return frame, position, orientation
 
         draw_params = dict(matchColor=(0, 255, 0),  # draw matches in green color
                            singlePointColor = None,
                            matchesMask = matchesMask,  # draw only inliers
                            flags=2)
 
-        img3 = cv2.drawMatches(self.robot_query, kp1, gray, kp2, good, None, **draw_params)
-        cv2.circle(img3, (314+self.robot_query.shape[1], 32), 5, (255, 0, 0), -1)
+        #img3 = cv2.drawMatches(self.robot_query, kp1, gray, kp2, good, None, **draw_params)
 
-        cv2.imshow("Centroid", frame)
-        cv2.waitKey(5)
+        #cv2.imshow("Centroid", frame)
+        #cv2.waitKey(5)
 
-        return position, orientation
+        return frame, position, orientation
 
     def init_blocks(self, num = 10):
         """Initialises the blocks"""
 
-        for coor in self.set_block_coordinates:
-            self.blocks[self.num_blocks] = Block(np.array(coor), self.num_blocks)
-            self.num_blocks += 1
+        #for coor in self.set_block_coordinates:
+        #    self.blocks[self.num_blocks] = Block(np.array(coor), self.num_blocks)
+        #    self.num_blocks += 1
 
         for i in range(0,num):
             self.blocks = self.update_blocks(self.blocks)
@@ -222,6 +233,14 @@ class Camera():
 
         return blocks
 
+    def random_line(self):
+        self.num_blocks = 0
+        for coor in self.set_block_coordinates:
+            self.blocks[self.num_blocks] = Block(np.array(coor), self.num_blocks)
+            self.num_blocks += 1
+
+        return self.blocks
+
     def check_initial_clear(self):
         conflict_blocks = {}
         conflict = False
@@ -238,6 +257,11 @@ class Camera():
         self.cap.stop()
         cv2.destroyAllWindows()
         self.open = False
+
+    def simple_backward(self, num):
+        for i in range(0, num):
+            self.coms.backward(50)
+        self.coms.stop()
 
     def __repr__(self):
         return "Camera :\n open: {}".format(self.open)

@@ -2,15 +2,18 @@ import numpy as np
 from simple_pid import PID
 from scipy.optimize import minimize_scalar
 from statistics import mode
+import cv2
+import time
 
-class Robot():
+
+class Robot:
     def __init__(self, camera, coms):
         """Sets up a Robot object"""
         self.camera = camera
         self.coms = coms
         self.position = False
         self.orientation = False
-        self.target = False  #Can assign block object
+        self.target = False  # Can assign block object
         self.front = False
         self.back = False
         self.distance = 0
@@ -19,35 +22,36 @@ class Robot():
         self.num_picked_up = 0
         self.pos_array = []
         self.ori_array = []
-        """
-        for i in range(0,3):
-            next_position, next_orientation = self.camera.get_position_orientation_robot()
+
+        for i in range(0, 3):
+            frame, next_position, next_orientation = self.camera.get_position_orientation_robot()
             self.pos_array.append(next_position)
             self.ori_array.append(next_orientation)
         print("Length pos_array:", len(self.pos_array))
         print("Length ori_array:", len(self.ori_array))
         self.update_position()
-        """
 
     def update_position(self):
         """Updates the position of the robot using the self.front and self.back circles"""
-        #some function camera.update_robot()
+        # some function camera.update_robot()
         self.pos_array.pop(0)
         self.ori_array.pop(0)
-        next_position, next_orientation = self.camera.get_position_orientation_robot()
+        frame, next_position, next_orientation = self.camera.get_position_orientation_robot()
         self.pos_array.append(next_position)
         self.ori_array.append(next_orientation)
+
         self.orientation = np.median(self.ori_array)
-        self.position = np.median(self.pos_array, axis = 0)
+        self.position = np.median(self.pos_array, axis=0)
+
+        position_arrow = self.position + 45 * np.array([np.sin(np.deg2rad(self.orientation)),
+                                                        -np.cos(np.deg2rad(self.orientation))])
+        cv2.arrowedLine(frame, tuple(self.position), tuple(position_arrow.astype(int)), (0, 255, 0), 2)
+        cv2.imshow("Centroid", frame)
+        cv2.waitKey(5)
 
     def find_next_target(self, blocks):
         """Use the camera to find the next destination as position coordinates"""
         blocks_sorted = sorted(blocks.values(), key=lambda x: self.get_distance_angle_target(x))
-
-        #For testing only:
-        blocks_dist = [self.get_distance_angle_target(block) for block in blocks_sorted]
-        print("Blocks_dist:")
-        print(blocks_dist)
 
         print("Assigning...")
         blocks_sorted[0].assigned = True
@@ -61,9 +65,9 @@ class Robot():
         self.move_forward()
         print("Arrived at destination")
 
-        #print("Final push")
-        #for i in range(0, 500):
-        #    self.coms.forward(50)
+        # print("Final push")
+        # for i in range(0, 500):
+        #     self.coms.forward(50)
 
     def nuclear_check(self):
         nuclear_output = 2
@@ -72,13 +76,12 @@ class Robot():
         print("Checking hall effect sensor")
         while len(outputs) <= 10:
             nuclear_output = self.coms.hall_effect()
+            print(nuclear_output)
             if nuclear_output != 2:
                 outputs.append(nuclear_output)
 
         nuclear_output = mode(outputs)
         print("Output HE received:", nuclear_output, type(nuclear_output))
-        return True
-
         """
         if nuclear_output == 1:
             self.target.tested = True
@@ -88,9 +91,8 @@ class Robot():
             self.target.tested = True
             self.target.nuclear = False
             return False
-        else:
-            raise ValueError("nuclear_output is not 1 or 0, see above")
         """
+        return nuclear_output
 
     def IR_check(self):
         IR_output = 2
@@ -116,7 +118,7 @@ class Robot():
                 print("Flushing")
                 self.coms.servo_state("right")
                 time.sleep(0.5)
-                self.simple_forward(200)
+                self.simple_forward(125)
                 self.coms.servo_state("centre")
                 return True
 
@@ -124,7 +126,7 @@ class Robot():
                 print("Placing in holding area")
                 self.coms.servo_state("left")
                 time.sleep(0.5)
-                self.simple_forward(200)
+                self.simple_forward(125)
                 self.coms.servo_state("centre")
                 return True
         else:
@@ -132,11 +134,12 @@ class Robot():
             return False
 
     def sort_procedure(self):
-        self.IR_check()
-        while self.target.present == False:
-            self.simple_forward(50)
-            self.IR_check()
+        #self.IR_check()
+        #while self.target.present == False:
+        #    self.simple_forward(50)
+        #    self.IR_check()
 
+        self.simple_forward(200)
         self.nuclear_check()
         self.sort()
 
@@ -159,7 +162,7 @@ class Robot():
         robot_block_vector = target.position - self.position  #vector from robot to block
 
         self.distance = np.linalg.norm(robot_block_vector)
-        print("Distance is:", self.distance)
+        #print("Distance is:", self.distance)
 
         sin_angle = np.cross(vertical_vector, robot_block_vector) / (1 * self.distance)
         cos_angle = np.dot(robot_block_vector, vertical_vector) / (1 * self.distance)
@@ -177,15 +180,14 @@ class Robot():
         elif self.angle < -180:
             self.angle = -1*(self.angle+180)
 
-        print("Angle is:", self.angle)
+        #print("Angle is:", self.angle)
 
         return self.distance, self.angle  #use self.target
 
-    def move_forward(self, p=0.5, i=0.1, d=0.1, num=1000):
+    def move_forward(self, p=0.5, i=0.1, d=0.1, s_p = 40):
         """Moves the robot forward"""
         margin_ori = 20
-        set_point = 40
-        pid = PID(p, i, d, setpoint = set_point)
+        pid = PID(p, i, d, setpoint = s_p)
         #pid.proportional_on_measurement = True
         pid.output_limits = (-50, 50)
 
@@ -193,7 +195,7 @@ class Robot():
         control = pid(self.distance)
         i = 0
 
-        while(control != 0 and abs(self.distance-set_point) > 10):
+        while(control != 0 and abs(self.distance-s_p) > 10):
             control = pid(self.distance)
 
             if np.abs(self.angle) >= margin_ori:
@@ -201,14 +203,15 @@ class Robot():
                 self.coms.stop()
                 self.turn()
 
-            print("Control dist output:", control*-1)
+            #print("Control dist output:", control*-1)
             #print("Components dist", pid.components) # the separate terms are now in p, i, d)
-            if np.abs(control) > 20:
+            if np.abs(control) > 10:
                 self.coms.forward(int(control*-1))
             else:
-                self.coms.forward(int(20*-1))
+                self.coms.forward(int(10*-1))
 
             self.distance, self.angle = self.get_distance_angle_target(self.target)
+            print("Distance away:", self.distance)
 
         print("Stopped moving forward")
 
@@ -225,8 +228,9 @@ class Robot():
         self.coms.stop()
 
     def simple_turn(self, num, sign):
+        #Positive, clockwise
         for i in range(0, num):
-            self.coms.turn(sign*20)
+            self.coms.turn(int(np.sign(sign)*20))
         self.coms.stop()
 
     def check_validity_turn(self):
@@ -258,26 +262,25 @@ class Robot():
         else:
             return True
 
-    def turn(self, p = 0.5, i = 0.1, d = 0.1, num = 40):
-        margin = 10
+    def turn(self, p = 0.5, i = 0.1, d = 0.1, margin = 10, on_measure = False):
         pid = PID(p, i, d, setpoint = 0)
         self.distance, self.angle = self.get_distance_angle_target(self.target)
-
         #Could implement a check for validity, if not valid, turn the other way
 
         pid.output_limits = (-50, 50)
         control = pid(self.angle)
-        i = 0
 
-        while(control != 0 and i < num and abs(self.angle) > 10):
-            print("Control output:", control*-1)
-            print("Components", pid.components)  # the separate terms are now in p, i, d)
+        pid.proportional_on_measurement(on_measure)
+
+        while(control != 0 and abs(self.angle) > margin):
+            #print("Control output:", control*-1)
+            #print("Components", pid.components)  # the separate terms are now in p, i, d)
             self.coms.turn(int(control*-1))
 
             self.distance, self.angle = self.get_distance_angle_target(self.target)
+            print("Angle is:", self.angle)
 
             control = pid(self.angle)
-            i += 1
 
         self.coms.stop()
 
