@@ -19,6 +19,7 @@ Button* hall_effect2;
 Button* IR_sensor;
 IDP_servo* selector_servo;
 LED* drive_led;
+LED* hall_led;
 
 void establishContact();
 String input_command = "";         // a String to hold incoming data
@@ -42,6 +43,7 @@ void setup() {
   hall_effect1 = new Button(2); // pin 2
   hall_effect2 = new Button(3);
   IR_sensor = new Button(4);
+  hall_led = new LED(8);
   // start serial port at 9600 bps:
   Serial.begin(9600);
   while (!Serial) {
@@ -55,6 +57,11 @@ void setup() {
 }
 
 void loop() {
+	if ((hall_effect1 -> read_state())||(hall_effect2 -> read_state())){
+		hall_led -> set_state(HIGH);
+	}else{
+		hall_led -> set_state(LOW);
+	}
     if (string_complete) {
     	switch(input_command[0]){
     	case 'a':
