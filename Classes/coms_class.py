@@ -21,7 +21,6 @@ class Coms():
             message[1] = bytes([11])
         self.serial.write(message)
 
-
     def motor(self, power: int, motor_name: str):
         #  takes power and motor name (right, left)  as parameters
         #  power is between -100 and 100

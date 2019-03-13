@@ -9,7 +9,14 @@ import numpy as np
 from Classes.coms_class import Coms
 from Classes.camera_class import Camera
 
-final_centre = np.array([551, 362])
+final_centre = np.array([531, 362])
+middle_stop = np.array([240, 400])
+drop_off = np.array([531, 562])
+first_location = np.array([70, 390])
+rotate = np.array([579, 350])
+align_2 = np.array([779, 350])
+align = np.array([-50, 50])   #previously 10, 50
+home = np.array([540, 440])
 
 name = initialise_connection.locate_port().device  # finds port connected to board (Arduino resets on connection)
 arduino_port = serial.Serial(name, 9600, timeout=5)  # 5 second timout for read method
@@ -20,84 +27,89 @@ arduino_coms = coms_class.Coms(arduino_port)
 arduino_coms.stop()
 arduino_coms.servo_state("centre")
 
-
 camera = Camera(arduino_coms)
-blocks = camera.init_blocks()
+blocks = camera.init_blocks().copy()
 robot = Robot(camera, arduino_coms)
 
-conflict, conflict_blocks = camera.check_initial_clear()
-if conflict:
-    print("Conflicts:", len(conflict_blocks))
-    while len(conflict) != 0:
-        robot.target = robot.find_next_target(conflict_blocks)
+middle_blocks = blocks.copy()
+for i in range(0,5):
+    middle_blocks.pop(i)
+print("Middle blocks", middle_blocks)
 
+for i in range(5, len(blocks)):
+    robot.target = robot.find_next_target(middle_blocks)
 
-        conflict_blocks.pop(robot.target.id)
+    middle_blocks.pop(robot.target.id)
 
-        robot.go_towards_target()
-        robot.sort_procedure()
-
-        camera.blocks[robot.target.id] = robot.target
-    print("Conflicts resolved")
-    print("Going towards corner to rotate for line up")
-    fake_target = Block(np.array([60,390]), 100)
-    robot.target = fake_target
     robot.go_towards_target()
-    #####Have to add a bit forward
 
-else:
-    robot.simple_forward(1800)
-    robot.simple_turn(600, 1)
+    robot.sort_procedure()
+
+    #Update main camera.blocks with their object values
+    camera.blocks[robot.target.id] = robot.target
+
+#GOING FOR LINE OF FIVE
+middle_stop_block = Block(middle_stop, 105)
+first_location_block = Block(first_location,103)
+align_block = Block(align, 104)
+
+robot.target = middle_stop_block
+robot.go_towards_target()
+
+robot.target = first_location_block
+robot.turn()
+robot.move_forward(s_p = 30)
+
+time.sleep(3)
+
+robot.target = align_block
+robot.turn(margin = 5)
+
+time.sleep(3)
 
 #Pick up the line of 5 blocks
 for i in range(0, 5):
+
     robot.target = camera.blocks[i]
 
-    robot.go_towards_target()
-
     robot.sort_procedure()
 
     #Update main camera.blocks with their object values
     camera.blocks[robot.target.id] = robot.target
 
-#Implement a anticlockwise turn and backward thing?
+#########
+#DROPPING OFF
+rotate_block = Block(rotate,101)
+align_2_block = Block(align_2,102)
 
-#Now spread out blocks (remaining):
-remaining_blocks = list(filter(lambda x: not x.tested, camera.blocks.values()))
+robot.target = rotate_block
+robot.turn(p= 0.2, d = 0.2)
+robot.move_forward(p=0.2, d=0.2, s_p = 10)
 
-while len(remaining_blocks) != 0:
-    robot.target = robot.find_next_target(remaining_blocks)
-
-    remaining_blocks.pop(robot.target.id)
-
-    robot.go_towards_target()
-
-    robot.sort_procedure()
-
-    #Update main camera.blocks with their object values
-    camera.blocks[robot.target.id] = robot.target
-
-final_target = Block(final_centre, 101)
-print("Going towards final rotating place")
-robot.target = final_target
-robot.go_towards_target()
-
-#Set sequence
-time.sleep(2)
-robot.simple_forward(200)
-time.sleep(2)
-robot.simple_turn(1000, 1)
 time.sleep(1)
+
+print("aligning")
+robot.target = align_2_block
+robot.turn()
+
+time.sleep(1)
+
 robot.simple_forward(500)
 time.sleep(1)
-robot.simple_backward(1000)
-time.sleep(1)
-robot.simple_forward(150)
+robot.specified_turn()
+
 robot.drop_off()
+
+############
 
 print("Mission accomplished (hopefully) returning home")
 
-robot.simple_forward()
+home_target = Block(home, 102)
+print("Going home...")
+robot.target = home_target
+robot.go_towards_target()
+robot.simple_forward(250)
+print("Arrived, going to sleep")
 
 arduino_coms.stop()
 arduino_port.close()

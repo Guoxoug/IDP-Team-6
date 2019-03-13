@@ -70,6 +70,20 @@ class Robot:
         # for i in range(0, 500):
         #     self.coms.forward(50)
 
+    def specified_turn(self):
+        power_left = -2
+        power_right = -100
+        self.coms.LED_flash("on")
+        num = 367
+        for i in range(0, num):
+            self.coms.motor(power_right, "right")
+            self.coms.motor(1.05 * power_left, "left")
+        self.coms.stop()
+
+        self.simple_backward(2750)
+        self.simple_forward(125)
+        return True
+
     def nuclear_check(self):
         nuclear_output = 2
         outputs = []
@@ -96,7 +110,6 @@ class Robot:
             return False
 
     def IR_check(self):
-        """
         IR_output = 2
 
         while IR_output == 2:
@@ -105,23 +118,14 @@ class Robot:
 
         print("Output IR received:", IR_output, type(IR_output))
 
-        if IR_output == 0:
+        if IR_output == 1:
             self.target.present = True
             return True
-        elif IR_output == 1:
+        elif IR_output == 0:
             self.target.present = False
             return False
         else:
             raise ValueError("IR_output is not 1 or 0, see above")
-        """
-        IR_output = 2
-
-        while IR_output == 2:
-            print("Checking IR sensor")
-            IR_output = self.coms.IR_sensor()
-
-        print("Output IR received:", IR_output, type(IR_output))
-        return IR_output
 
     def sort(self):
         if self.target.tested == True:
@@ -129,18 +133,20 @@ class Robot:
                 print("Flushing")
                 self.coms.servo_state("right")
                 time.sleep(0.5)
-                self.simple_forward(140)
+                self.simple_forward(180)
                 time.sleep(0.5)
                 self.coms.servo_state("centre")
+                self.simple_backward(300)     #simple backward 300
                 return True
 
-            elif self.target.nuclear == False:
+            else:
                 print("Placing in holding area")
                 self.coms.servo_state("left")
                 time.sleep(0.5)
-                self.simple_forward(140)
+                self.simple_forward(180)
                 time.sleep(0.5)
                 self.coms.servo_state("centre")
+                self.simple_backward(300)
                 return True
         else:
             print("Attempting to sweep but not yet tested")
@@ -148,17 +154,24 @@ class Robot:
 
     def sort_procedure(self):
         self.IR_check()
-        self.coms.forward(50)
-        while self.target.present == False:
+        self.coms.forward(30)
+        i = 0
+        while self.target.present == False and i < 1000:
             self.IR_check()
-        self.coms.stop()
+            i += 1
+        if i < 1000:
+            self.coms.stop()
 
-        self.simple_forward(75)
-        self.nuclear_check()
-        self.sort()
+            self.simple_forward(75)
+            self.nuclear_check()
+            self.sort()
 
-        print("Sort procedure finished")
-        return True
+            print("Sort procedure finished")
+            return True
+        else:
+            print("Didn't come up on IR")
+            self.simple_backward(300)
+            return True
 
     def drop_off(self):
         self.coms.offload()
@@ -195,6 +208,19 @@ class Robot:
             self.angle = -1*(self.angle+180)
 
         #print("Angle is:", self.angle)
+        if self.coms.IR_sensor() == 1:
+            self.simple_forward(75)
+            nuclear_test = self.nuclear_check()
+            if nuclear_test:
+                self.coms.servo_state("right")
+            elif nuclear_test == False:
+                self.coms.servo_state("left")
+            time.sleep(0.5)
+            self.simple_forward(180)
+            time.sleep(0.5)
+            self.coms.servo_state("centre")
+            self.simple_backward(300)
+
 
         return self.distance, self.angle  #use self.target
 
@@ -229,6 +255,18 @@ class Robot:
 
         print("Stopped moving forward")
 
+        self.coms.stop()
+
+    def special_simple_backward(self, num):
+        detect = False
+        self.coms.backward(50)
+        for i in range(0, num):
+            if self.coms.IR_sensor() == 1:
+                self.coms.stop()
+                detect = True
+                break
+        if detect == True:
+            self.sort_procedure()
         self.coms.stop()
 
     def simple_backward(self, num):

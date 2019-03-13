@@ -143,6 +143,14 @@ class Camera():
             dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+            #m_shape = M.shape
+            #if m_shape != (3,3):
+            #    print("Wrong shape", m_shape)
+            #    while m_shape != (3,3):
+            #        robot.simple_backward(200)
+
+
+
             matchesMask = mask.ravel().tolist()
 
             scale, shear, angles, translate, perspective = decompose_matrix(M)
@@ -189,11 +197,11 @@ class Camera():
 
     def init_blocks(self, num = 10):
         """Initialises the blocks"""
-        """
+
         for coor in self.set_block_coordinates:
             self.blocks[self.num_blocks] = Block(np.array(coor), self.num_blocks)
             self.num_blocks += 1
-        """
+
         for i in range(0,num):
             self.blocks = self.update_blocks(self.blocks)
 
