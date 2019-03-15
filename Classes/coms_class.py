@@ -131,7 +131,7 @@ class Coms():
 
     def pulley(self, state: str):
         if state == "up":
-            self.motor(50, "pulley")  # placeholder power
+            self.motor(75, "pulley")  # placeholder power
         elif state == "down":
             self.motor(-50, "pulley")
         elif state == "stop":
@@ -144,33 +144,32 @@ class Coms():
         self.pulley("stop")
         time.sleep(2)
         self.pulley("down")
-        time.sleep(5 * 0.5)
+        time.sleep(2.85)
         self.pulley("stop")
 
     def pusher(self, state: str):
         if state == "push":
-            self.motor(70, "pusher")  # placeholder power
+            self.motor(100, "pusher")  # placeholder power
         elif state == "retract":
             self.motor(-70, "pusher")
         elif state == "stop":
             self.motor(0, "pusher")
 
     def pusher_activate(self):
-
         self.pusher("push")
-        time.sleep(3.5)
+        time.sleep(2.0)  # Definitely not above 3.2!!!
         self.pusher("retract")
-        time.sleep(3.5)
+        time.sleep(3.2)
         self.pusher("stop")
 
     def offload(self):
         self.pulley("down")
-        time.sleep(0.7)
+        time.sleep(0.97)
         self.pulley("stop")  # placeholder time for rising pulley
         self.pusher_activate()
 
         self.pulley("up")
-        time.sleep(0.8)
+        time.sleep(1.1)
         self.pulley_activate()
 
     """Request for sensor info"""

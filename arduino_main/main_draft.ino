@@ -20,6 +20,7 @@ Button* IR_sensor;
 IDP_servo* selector_servo;
 LED* drive_led;
 LED* hall_led;
+LED* IR_led;
 
 void establishContact();
 String input_command = "";         // a String to hold incoming data
@@ -30,7 +31,7 @@ void setup() {
 
 	// I/O object definitions
 	//Motors and servos
-  drive_led = new LED(7);
+  drive_led = new LED(5);
   right_fwd = new DCMotor(1,FORWARD);
   right_bwd = new DCMotor(1,BACKWARD);
   left_fwd = new DCMotor(2, FORWARD);
@@ -44,6 +45,7 @@ void setup() {
   hall_effect2 = new Button(3);
   IR_sensor = new Button(4);
   hall_led = new LED(8);
+  IR_led = new LED(6);
   // start serial port at 9600 bps:
   Serial.begin(9600);
   while (!Serial) {
@@ -61,6 +63,11 @@ void loop() {
 		hall_led -> set_state(HIGH);
 	}else{
 		hall_led -> set_state(LOW);
+	}
+	if (IR_sensor -> read_state()){ //IR sensor is inverted
+		IR_led -> set_state(HIGH);
+	}else{
+		IR_led -> set_state(LOW);
 	}
     if (string_complete) {
     	switch(input_command[0]){

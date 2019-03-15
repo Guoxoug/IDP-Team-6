@@ -13,18 +13,21 @@ arduino_coms = coms_class.Coms(arduino_port)
 arduino_coms.servo_state("centre")
 
 arduino_coms.forward(78)
-time.sleep(4)
+time.sleep(10)
 arduino_coms.stop()
 arduino_coms.servo_state("left")
 time.sleep(2)
-arduino_coms.forward(70)
+#arduino_coms.forward(70)
 time.sleep(4)
 
 
 arduino_coms.stop()
 
 
-
+while True:
+    print("IR result ", arduino_coms.IR_sensor(), "\n"
+          "Hall effect ", arduino_coms.hall_effect())
+    time.sleep(0.3)
 # for i in range(8):
 #
 #     arduino_coms.pulley("down")
