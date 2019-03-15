@@ -1,14 +1,22 @@
+from init_connection import initialise_connection
+import numpy as np
 import time
 
-"""class with"""
-
+#servo 2 for sorter
+#m1 right
+#m2 left
+#m3 pulley
+#m4 pusher
 
 class Coms():
-    """All messages are """
-
+    """Communications class with the arduino"""
     def __init__(self, serial):
         """Sets up a communication object"""
         self.serial = serial  # Serial object
+
+        #Make sure motors aren't running and servo is centred
+        self.stop()
+        self.servo_state("centre")
 
     def send(self, message: bytearray):
         # serial something
@@ -74,32 +82,22 @@ class Coms():
 
         command += b"\n"
         # newline indicates end of command to arduino
-        print("command: ", command)
         self.send(command)
 
-
-
-    # Movement methods
-    # Self explanatory ^^
     # power always int 0-100
     def forward(self, power):
         self.motor(power, "right")
-        self.motor(power, "left")
+        self.motor(1.05*power, "left")
         self.LED_flash("on")
 
-    def backward(self, power):
+    def backward(self, power):   #red left, white right
         self.motor(-power, "right")
-        self.motor(-power, "left")
+        self.motor(-1.05*power, "left")
         self.LED_flash("on")
 
-    def turn(self, power, direction: str):
-
-        if direction == "clockwise":
-            self.motor(-power, "right")
-            self.motor(power, "left")
-        if direction == "anticlockwise":
-            self.motor(power, "right")
-            self.motor(-power, "left")
+    def turn(self, power):
+        self.motor(-power, "right")
+        self.motor(power, "left")
         self.LED_flash("on")
 
     def stop(self):
@@ -111,27 +109,28 @@ class Coms():
         """sets position of servo in degrees 0- 180
         NB 78 is centre, angles are measured anticlockwise
         testing shows it can swing +-30 degrees without getting stuck"""
+        position = int(position) # bytes only takes ints
 
-        position = int(position)  # bytes only takes ints
         command = bytearray([])
         command += b"e"
         command += bytes([position])
         command += b"\n"
-        print("command: ", command)
+
         # newline indicates end of command to arduino
         self.send(command)
 
     def servo_state(self, state: str):
+        centre = 80
         if state == "right":
-            self.servo(78 - 30)
+            self.servo(centre-24)
         elif state == "left":
-            self.servo(78 + 30)
+            self.servo(centre+29)
         elif state == "centre":
-            self.servo(78)
+            self.servo(centre)
 
     def pulley(self, state: str):
         if state == "up":
-            self.motor(50, "pulley")  # placeholder power
+            self.motor(75, "pulley")  # placeholder power
         elif state == "down":
             self.motor(-50, "pulley")
         elif state == "stop":
@@ -140,37 +139,36 @@ class Coms():
     def pulley_activate(self):
         """Time ration for up/down is approx 1.4"""
         self.pulley("up")
-        time.sleep(5 * 0.7)  # placeholder time for rising pulley
+        time.sleep(5*0.7)  # placeholder time for rising pulley
         self.pulley("stop")
         time.sleep(2)
         self.pulley("down")
-        time.sleep(5 * 0.5)
+        time.sleep(2.85)
         self.pulley("stop")
 
     def pusher(self, state: str):
         if state == "push":
-            self.motor(70, "pusher")  # placeholder power
+            self.motor(100, "pusher")  # placeholder power
         elif state == "retract":
             self.motor(-70, "pusher")
         elif state == "stop":
             self.motor(0, "pusher")
 
     def pusher_activate(self):
-
         self.pusher("push")
-        time.sleep(3.5)
+        time.sleep(2.0)   #Definitely not above 3.2!!!
         self.pusher("retract")
-        time.sleep(3.5)
+        time.sleep(3.2)
         self.pusher("stop")
 
     def offload(self):
         self.pulley("down")
-        time.sleep(0.7)
-        self.pulley("stop")  # placeholder time for rising pulley
+        time.sleep(0.97)
+        self.pulley("stop")# placeholder time for rising pulley
         self.pusher_activate()
 
         self.pulley("up")
-        time.sleep(0.8)
+        time.sleep(1.1)
         self.pulley_activate()
 
     """Request for sensor info"""
@@ -201,7 +199,6 @@ class Coms():
             result = int.from_bytes(result, "big")
             return result
 
-
     def LED_flash(self, state):
         command = bytearray(b"l")
         if state == "on":
@@ -211,4 +208,3 @@ class Coms():
             command += bytes([0])
             command += b"\n"
         self.send(command)
-
