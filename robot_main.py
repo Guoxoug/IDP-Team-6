@@ -19,14 +19,12 @@ align = np.array([-50, 50])   #previously 10, 50
 home = np.array([540, 440])
 
 name = initialise_connection.locate_port().device  # finds port connected to board (Arduino resets on connection)
-arduino_port = serial.Serial(name, 9600, timeout=5)  # 5 second timout for read method
+arduino_port = serial.Serial(name, 9600, timeout=5)  # 5 second timeout for read method
 initialise_connection.handshake(arduino_port)
 
 arduino_coms = coms_class.Coms(arduino_port)
 
-arduino_coms.stop()
-arduino_coms.servo_state("centre")
-
+#Initialise classes
 camera = Camera(arduino_coms)
 blocks = camera.init_blocks().copy()
 robot = Robot(camera, arduino_coms)
@@ -49,6 +47,7 @@ for i in range(5, len(blocks)):
     camera.blocks[robot.target.id] = robot.target
 
 #GOING FOR LINE OF FIVE
+#Go to a central location and then to the corner to line up with the wall
 middle_stop_block = Block(middle_stop, 105)
 first_location_block = Block(first_location,103)
 align_block = Block(align, 104)
@@ -67,7 +66,7 @@ robot.turn(margin = 5)
 
 time.sleep(3)
 
-#Pick up the line of 5 blocks
+#Pick up the line of 5 blocks, simple go forward until the IR_sensor detects something
 for i in range(0, 5):
 
     robot.target = camera.blocks[i]
@@ -79,6 +78,7 @@ for i in range(0, 5):
 
 #########
 #DROPPING OFF
+#Go towards a pre-determined location and drive into the wall so it is perpendicular with the wall
 rotate_block = Block(rotate,101)
 align_2_block = Block(align_2,102)
 
@@ -96,6 +96,8 @@ time.sleep(1)
 
 robot.simple_forward(500)
 time.sleep(1)
+
+#Perform the specified turn
 robot.specified_turn()
 
 robot.drop_off()

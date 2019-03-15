@@ -8,9 +8,6 @@ class Block():
         self.nuclear = None
         self.assigned = False
 
-    def update_position(self, new_position):
-        """Updates the position of the block"""
-        position = new_position
-
     def __repr__(self):
+        """Print function with relevant information"""
         return "Block {}:\n position: {}\n tested: {}\n nuclear: {}\n presesnt: {}\n assigned: {}".format(self.id, self.position, self.tested, self.nuclear, self.present, self.assigned)

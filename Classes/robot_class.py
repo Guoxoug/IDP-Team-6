@@ -10,19 +10,16 @@ class Robot:
     def __init__(self, camera, coms):
         """Sets up a Robot object"""
         self.camera = camera
-        self.coms = coms
+        self.coms = coms  #communications module for the arduino
         self.position = False
         self.orientation = False
         self.target = False  # Can assign block object
-        self.front = False
-        self.back = False
-        self.distance = 0
-        self.angle = 0
-        self.num_tested = 0
-        self.num_picked_up = 0
+        self.distance = 0 #Distance from target
+        self.angle = 0  #Angle from target
         self.pos_array = []
         self.ori_array = []
 
+        #Initialise the array where the last three positions and orientations are stored in
         for i in range(0, 3):
             frame, next_position, next_orientation = self.camera.get_position_orientation_robot()
             self.pos_array.append(next_position)
@@ -33,17 +30,22 @@ class Robot:
 
 
     def update_position(self):
-        """Updates the position of the robot using the self.front and self.back circles"""
-        # some function camera.update_robot()
+        """Updates the position of the robot by analysing another image and taking the median of the last three"""
         self.pos_array.pop(0)
         self.ori_array.pop(0)
+
+        #Get the newest position and orientation from the camera class
         frame, next_position, next_orientation = self.camera.get_position_orientation_robot()
+
         self.pos_array.append(next_position)
         self.ori_array.append(next_orientation)
 
+        #Take the median of the last three as the new position and orientation
         self.orientation = np.median(self.ori_array)
         self.position = np.median(self.pos_array, axis=0)
 
+        #Draw on the current frame with an arrow starting at the position
+        # in the direciton of the orientation
         position_arrow = self.position + 45 * np.array([np.sin(np.deg2rad(self.orientation)),
                                                         -np.cos(np.deg2rad(self.orientation))])
         cv2.arrowedLine(frame, tuple(self.position), tuple(position_arrow.astype(int)), (0, 255, 0), 2)
@@ -51,7 +53,7 @@ class Robot:
         cv2.waitKey(5)
 
     def find_next_target(self, blocks):
-        """Use the camera to find the next destination as position coordinates"""
+        """Given a dictionary of blocks it will return the closest one to be used as its next target"""
         blocks_sorted = sorted(blocks.values(), key=lambda x: self.get_distance_angle_target(x))
 
         print("Assigning...")
@@ -65,12 +67,11 @@ class Robot:
         self.turn()
         self.move_forward()
         print("Arrived at destination")
-
-        # print("Final push")
-        # for i in range(0, 500):
-        #     self.coms.forward(50)
+        return True
 
     def specified_turn(self):
+        """Determines the last turn when robot is against wall next to platform such that after the turn the
+            platform is aligned with our lift"""
         power_left = -2
         power_right = -100
         self.coms.LED_flash("on")
@@ -80,11 +81,13 @@ class Robot:
             self.coms.motor(1.05 * power_left, "left")
         self.coms.stop()
 
-        self.simple_backward(2750)
+        #Go further backwards and then slightly forward so blocks are against the back of the robot for sweeper
+        self.simple_backward(275)
         self.simple_forward(125)
         return True
 
     def nuclear_check(self):
+        """Uses the hall effect sensor to check for a magnetic field, takes the mode of 10 readings"""
         nuclear_output = 2
         outputs = []
 
@@ -98,6 +101,7 @@ class Robot:
         nuclear_output = mode(outputs)
         print("Output HE received:", nuclear_output, type(nuclear_output))
 
+        #Update the block variables
         if nuclear_output == 1:
             print("Nuclear")
             self.target.tested = True
@@ -110,6 +114,8 @@ class Robot:
             return False
 
     def IR_check(self):
+        """Similar to nuclear_check but now checking the IR sensor for a positive reading indicating
+            a block is present"""
         IR_output = 2
 
         while IR_output == 2:
@@ -128,6 +134,7 @@ class Robot:
             raise ValueError("IR_output is not 1 or 0, see above")
 
     def sort(self):
+        """Using the target block variables it will sort them into the correct side"""
         if self.target.tested == True:
             if self.target.nuclear == True:
                 print("Flushing")
@@ -135,7 +142,10 @@ class Robot:
                 time.sleep(0.5)
                 self.simple_forward(180)
                 time.sleep(0.5)
+                self.coms.servo_state("left")
+                time.sleep(0.5)
                 self.coms.servo_state("centre")
+                time.sleep(0.5)
                 self.simple_backward(300)     #simple backward 300
                 return True
 
@@ -148,18 +158,26 @@ class Robot:
                 self.coms.servo_state("centre")
                 self.simple_backward(300)
                 return True
+
         else:
             print("Attempting to sweep but not yet tested")
             return False
 
     def sort_procedure(self):
+        """Combines all the functions required to sort a block"""
         self.IR_check()
         self.coms.forward(30)
         i = 0
+
+        #Whilst robot is moving at speed of 30 check IR sensor and stop when a positive reading is given
         while self.target.present == False and i < 1000:
             self.IR_check()
+
+            # i iterations is in case it accidentally missed the block so that it won't go forward forever
             i += 1
+
         if i < 1000:
+            #When a block is found do the folllowing
             self.coms.stop()
 
             self.simple_forward(75)
@@ -169,27 +187,25 @@ class Robot:
             print("Sort procedure finished")
             return True
         else:
+            #Missed the block somehow, simply back up
             print("Didn't come up on IR")
             self.simple_backward(300)
             return True
 
     def drop_off(self):
+        "Starts the sweep and lift procedure"
         self.coms.offload()
         return True
 
     def get_distance_angle_target(self, target):
-        """Gets the orientation of itself relative to Block using angle between line of circle-circle and centre-circle
-        clockwise is positive rotation
-        """
-        #always call update_position before this
+        """Gets the orientation of itself relative to Block clockwise is positive rotation"""
         self.update_position()
 
-        orientation_rad = np.deg2rad(self.orientation)
+        orientation_rad = np.deg2rad(self.orientation)  #orientation is relative to a vertical upwards vector
         vertical_vector = np.array([0,-1])
         robot_block_vector = target.position - self.position  #vector from robot to block
 
         self.distance = np.linalg.norm(robot_block_vector)
-        #print("Distance is:", self.distance)
 
         sin_angle = np.cross(vertical_vector, robot_block_vector) / (1 * self.distance)
         cos_angle = np.dot(robot_block_vector, vertical_vector) / (1 * self.distance)
@@ -207,7 +223,7 @@ class Robot:
         elif self.angle < -180:
             self.angle = -1*(self.angle+180)
 
-        #print("Angle is:", self.angle)
+        #In case a block approaches it even though it is not expecting it still sort it accordingly
         if self.coms.IR_sensor() == 1:
             self.simple_forward(75)
             nuclear_test = self.nuclear_check()
@@ -222,10 +238,10 @@ class Robot:
             self.simple_backward(300)
 
 
-        return self.distance, self.angle  #use self.target
+        return self.distance, self.angle
 
     def move_forward(self, p=0.5, i=0.1, d=0.1, s_p = 40):
-        """Moves the robot forward"""
+        """Moves the robot forward using a PID controller"""
         margin_ori = 20
         pid = PID(p, i, d, setpoint = s_p)
         #pid.proportional_on_measurement = True
@@ -238,16 +254,16 @@ class Robot:
         while(control != 0 and abs(self.distance-s_p) > 10):
             control = pid(self.distance)
 
+            #If the angle between the block and robot exceeds margin_ori, stop and align again
             if np.abs(self.angle) >= margin_ori:
                 print("Stopping")
                 self.coms.stop()
                 self.turn()
 
-            #print("Control dist output:", control*-1)
-            #print("Components dist", pid.components) # the separate terms are now in p, i, d)
             if np.abs(control) > 10:
                 self.coms.forward(int(control*-1))
             else:
+                #forward less than 10 doesn't actually move so take a lower bound of 10
                 self.coms.forward(int(10*-1))
 
             self.distance, self.angle = self.get_distance_angle_target(self.target)
@@ -257,67 +273,28 @@ class Robot:
 
         self.coms.stop()
 
-    def special_simple_backward(self, num):
-        detect = False
-        self.coms.backward(50)
-        for i in range(0, num):
-            if self.coms.IR_sensor() == 1:
-                self.coms.stop()
-                detect = True
-                break
-        if detect == True:
-            self.sort_procedure()
-        self.coms.stop()
-
     def simple_backward(self, num):
+        """Simple function that goes backward for num iterations"""
         for i in range(0, num):
             self.coms.backward(50)
         self.coms.stop()
 
     def simple_forward(self, num, speed = 50):
+        """Simple function that goes backward for num iterations"""
         for i in range(0, num):
             self.coms.forward(speed)  #
         self.coms.stop()
 
     def simple_turn(self, num, sign):
-        #Positive, clockwise
+        """Simple function that turns for num iterations"""
         for i in range(0, num):
             self.coms.turn(int(np.sign(sign)*20))
         self.coms.stop()
 
-    def check_validity_turn(self):
-        c_o_rotation = self.position + 52*np.array([np.sin(self.orientation), np.cos(self.orientation)])
-        print("Self.position:", self.position)
-        print("Centre of rotation:", c_o_rotation)
-
-        #Coordinates of corners_robot relative to centre of rotation when self.orientation = 0
-        corners_robot = np.array([[50, 18], [-50, 18], [50, -107], [-50, -107]])
-        corner_vectors = [corner-c_o_rotation for corner in corners_robot]
-
-        abs_angle_rotation = self.orientation+self.angle
-
-        min_x = 0
-        for vector in corner_vectors:
-            if np.sign(abs_angle_rotation) == 1:
-                min_x_c = minimize_scalar(lambda x: np.cos(x) * vector[0] - np.sin(x) * vector[1], bounds=[0,abs_angle_rotation], method='bounded')
-            else:
-                min_x_c = minimize_scalar(lambda x: np.cos(x) * vector[0] - np.sin(x) * vector[1], bounds=[abs_angle_rotation, 0], method='bounded')
-            print("Min_x_c:", min_x_c)
-            min_x = min(min_x, min_x_c)
-
-        print("Min_x", min_x)
-        print("Most left point it would hit:", (self.position[0] + min_x))
-
-        if (self.position[0] + min_x) < 23:
-            print("It is not safe to turn this way")
-            return False
-        else:
-            return True
-
     def turn(self, p = 0.5, i = 0.1, d = 0.1, margin = 10, on_measure = False):
+        """Aligns itself with target using a PID controller"""
         pid = PID(p, i, d, setpoint = 0)
         self.distance, self.angle = self.get_distance_angle_target(self.target)
-        #Could implement a check for validity, if not valid, turn the other way
 
         pid.output_limits = (-50, 50)
         control = pid(self.angle)
@@ -325,8 +302,6 @@ class Robot:
         pid.proportional_on_measurement = on_measure
 
         while(control != 0 and abs(self.angle) > margin):
-            #print("Control output:", control*-1)
-            #print("Components", pid.components)  # the separate terms are now in p, i, d)
             self.coms.turn(int(control*-1))
 
             self.distance, self.angle = self.get_distance_angle_target(self.target)
@@ -334,8 +309,10 @@ class Robot:
 
             control = pid(self.angle)
 
+        print("Stopped turning")
+
         self.coms.stop()
 
     def __repr__(self):
-        return "Robot\n position: {}\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}".format(self.position) #, self.target, self.orientation, self.distance, self.num_tested, self.num_picked_up)
-        #\n target position: {}\n orientation: {}\n distance: {}\n number tested: {}\n number picked up: {}"
+        """Print function with useful information about the robot"""
+        return "Robot\n position: {}\n orientation: {}\n target: {}\n distance: {}\n angle: {}".format(self.position, self.orientation, self.target, self.distance, self.angle)

@@ -16,7 +16,7 @@ class VideoCaptureAsync:
 
     def start(self):
         if self.started:
-            print('[!] Asynchroneous video capturing has already been started.')
+            print('[!] Asynchronous video capturing has already been started.')
             return None
         self.started = True
         self.thread = threading.Thread(target=self.update, args=())
@@ -24,12 +24,14 @@ class VideoCaptureAsync:
         return self
 
     def update(self):
+        """Constantly update new frame"""
         while self.started:
             grabbed, frame = self.cap.read()
             with self.read_lock:
                 self.frame = frame
 
     def read(self):
+        """Return the newest frame when called"""
         with self.read_lock:
             frame = self.frame.copy()
         return frame

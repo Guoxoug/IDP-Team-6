@@ -3,16 +3,20 @@ import numpy as np
 import time
 
 #servo 2 for sorter
-# M1 right
+#m1 right
 #m2 left
 #m3 pulley
 #m4 pusher
 
 class Coms():
-    """All messages are """
+    """Communications class with the arduino"""
     def __init__(self, serial):
         """Sets up a communication object"""
         self.serial = serial  # Serial object
+
+        #Make sure motors aren't running and servo is centred
+        self.stop()
+        self.servo_state("centre")
 
     def send(self, message: bytearray):
         # serial something
@@ -115,12 +119,13 @@ class Coms():
         self.send(command)
 
     def servo_state(self, state: str):
+        centre = 80
         if state == "right":
-            self.servo(79-30)
+            self.servo(centre-24)
         elif state == "left":
-            self.servo(79+31)
+            self.servo(centre+29)
         elif state == "centre":
-            self.servo(79)
+            self.servo(centre)
 
     def pulley(self, state: str):
         if state == "up":
