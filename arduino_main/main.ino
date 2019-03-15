@@ -1,4 +1,4 @@
-// using serialEvent(), called at the end of each loop (called when data is available)
+
 
 
 #include "Arduino.h"
@@ -6,6 +6,7 @@
 #include "Adafruit_MotorShield.h"
 #include <Servo.h>
 
+// pointer declaration for I/O objects
 DCMotor* right_fwd;
 DCMotor* right_bwd;
 DCMotor* left_fwd;
@@ -30,7 +31,7 @@ void setup() {
 	AFMS.begin();   // create with the default frequency 1.6KHz
 
 	// I/O object definitions
-	//Motors and servos
+
   drive_led = new LED(5);
   right_fwd = new DCMotor(1,FORWARD);
   right_bwd = new DCMotor(1,BACKWARD);
@@ -53,9 +54,10 @@ void setup() {
   }
 // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
-  input_command.reserve(200);
+  input_command.reserve(200); // reserve memory for command
 
   establishContact();   //send a byte to establish contact until receiver responds
+  // paired with handshake function in Python
 }
 
 void loop() {
@@ -64,12 +66,13 @@ void loop() {
 	}else{
 		hall_led -> set_state(LOW);
 	}
-	if (IR_sensor -> read_state()){ //IR sensor is inverted
+	if (IR_sensor -> read_state()){
 		IR_led -> set_state(HIGH);
 	}else{
 		IR_led -> set_state(LOW);
 	}
     if (string_complete) {
+        // switch statement for interpreting commands from serial
     	switch(input_command[0]){
     	case 'a':
     		right_fwd->set_state(int(input_command[1])); //  reverts Char input back into int
@@ -118,6 +121,7 @@ void loop() {
 
 
 void serialEvent() {
+  // using serialEvent(), called at the end of each loop (called when data is available)
   //This is where commands come in
   while (Serial.available()) {
     // get the new byte:

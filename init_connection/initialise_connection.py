@@ -4,7 +4,7 @@ import time
 
 """connection initialisation module
 finds port that board is connected to 
-handshake"""
+and initiates handshake"""
 
 
 def locate_port():
@@ -27,10 +27,12 @@ def handshake(port):
     counter = 0
     while True:
         counter += 1
+        # Arduino sending out "hello" on a loop
         if port.read(5).decode("utf-8") == "hello":
             print("hello received")
             port.write(b"H")
             reply = port.read().decode("utf-8")  # don't need sleep as timeout is inside read method
+            #  important to specify timout when serial object is initialised though
             #  receives reply from Arduino acknowledging PC
             if reply == "H":
                 print("handshake complete, port now open")

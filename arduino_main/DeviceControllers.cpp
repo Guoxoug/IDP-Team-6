@@ -2,7 +2,7 @@
  * DeviceControllers.cpp
  *
  *  Created on: 27 Feb 2019
- *      Author: Guy
+ *      Author: guyIsSmexy6969
  */
 #include <Servo.h>
 #include "DeviceControllers.h"
@@ -15,11 +15,11 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 
 IO::IO(int pin_number){ //Parameterised constructor for generic IO
 	pin = pin_number;
-	//Serial.println("IO constructor");
+
 }
 
 void IO::print_pin_state(){
-	//Serial.print("IO is located on pin/port: ");
+//just prints the pin number
 	Serial.println(pin);
 }
 
@@ -34,7 +34,7 @@ bool Sensor::state_changed(){ //default state changed check is pretty literal
 	old_state = new_state; //save for next time
 	return state_changed;
 }
-
+// This function was unused
 void Sensor::set_state(int isEnabled){
 //	if (isEnabled == 1){
 //		activeSensors.push_back(this); //add to vector containing all sensors
@@ -47,6 +47,7 @@ Button::Button(int pin_number) : Sensor(pin_number){}
 
 
 int Button::read_state(){
+    // just returns the state of a pin, super generic
 	return digitalRead(pin);
 }
 
@@ -66,12 +67,13 @@ DCMotor::DCMotor(int motor_port, int dir) : IO(motor_port){
 }
 
 void DCMotor::set_state(int power){
+    // motor is a pointer, sets direction and power
 	motor->setSpeed(power);
 	motor->run(direction);
 }
 
 IDP_servo::IDP_servo(int pin_number) : IO(pin_number){
-	our_servo.attach(pin_number);
+	our_servo.attach(pin_number); // assigns pin to servo
 }
 
 void IDP_servo::set_state(int position){
